@@ -1,0 +1,9 @@
+	auth = 0 -> İsg Uzmanı
+	auth = 1 -> Yönetici
+	auth = 2 -> Hekim
+	auth = 3 -> Diğer Sağlık Personeli
+	auth = 4 -> Ofis Personeli
+	auth = 5 -> İşletme sahibi
+	auth = 6 -> Muhasebeci
+	auth = 7 -> İşletme Çalışanı
+	auth = 15 -> Silinen kullanıcı

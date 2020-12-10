@@ -1,496 +1,15 @@
 <?php session_start();
-$isim = 'deneme3';
-require '../../vendor/autoload.php';
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
+$isim = 'deneme4';
 require_once('../../calendar/utils/auth.php');
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
     header('Location: ../../../login.php');
     exit;
 }
-
-require '../../../connect.php';
 $id=$_SESSION['user_id'];
-
-$başlangıç=$pdo->prepare("SELECT * FROM users WHERE id = '$id'");
-$başlangıç->execute();
-$girişler=$başlangıç-> fetchAll(PDO::FETCH_OBJ);
-foreach ($girişler as $giriş) {
-    $fn = $giriş->firstname;
-    $ln = $giriş->lastname;
-    $un = $giriş->username;
-    $ume = $giriş->username;
-    $yetkili_auth = $giriş->auth;
-    $picture= $giriş->picture;
-    $giriş_auth = $giriş->auth;
-}
-
-$yetki=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `name` = '$isim'");
-$yetki->execute();
-$yets=$yetki-> fetchAll(PDO::FETCH_OBJ);
-foreach ($yets as $yet) {
-    $company_id=$yet->id;
-    $yetkili_uzman_id = $yet->uzman_id;
-    $yetkili_uzman_id_2 = $yet->uzman_id_2;
-    $yetkili_uzman_id_3 = $yet->uzman_id_3;
-
-    $yetkili_hekim_id = $yet->hekim_id;
-    $yetkili_hekim_id_2 = $yet->hekim_id_2;
-    $yetkili_hekim_id_3 = $yet->hekim_id_3;
-
-    $yetkili_id = $yet->yetkili_id;
-
-    $yetkili_saglık_p_id = $yet->saglık_p_id;
-    $yetkili_saglık_p_id_2 = $yet->saglık_p_id_2;
-
-    $yetkili_ofis_p_id = $yet->ofis_p_id;
-    $yetkili_ofis_p_id_2 = $yet->ofis_p_id_2;
-
-    $yetkili_muhasebe_p_id = $yet->muhasebe_p_id;
-    $yetkili_muhasebe_p_id_2 = $yet->muhasebe_p_id_2;
-}
-if ($yetkili_auth != 1) {
-    if ($yetkili_hekim_id == $id) {
-        echo "";
-    }elseif ($yetkili_hekim_id_2 == $id) {
-        echo "";
-    }elseif ($yetkili_hekim_id_3 == $id) {
-        echo "";
-    } elseif ($yetkili_uzman_id == $id) {
-        echo "";
-    }elseif ($yetkili_uzman_id_2 == $id) {
-        echo "";
-    }elseif ($yetkili_uzman_id_3 == $id) {
-        echo "";
-    } elseif ($yetkili_id == $id) {
-        echo "";
-    } elseif ($yetkili_saglık_p_id == $id) {
-        echo "";
-    }elseif ($yetkili_saglık_p_id_2 == $id) {
-        echo "";
-    } elseif ($yetkili_ofis_p_id == $id) {
-        echo "";
-    }elseif ($yetkili_ofis_p_id_2 == $id) {
-        echo "";
-    } elseif ($yetkili_muhasebe_p_id == $id) {
-        echo "";
-    }elseif ($yetkili_muhasebe_p_id_2 == $id) {
-        echo "";
-    } else {
-        header('Location: ../../403.php');
-    }
-}
-$sql_event = "SELECT * FROM `events` WHERE `company_id` = '$company_id'";
-
-$req = $auth->prepare($sql_event);
-$req->execute();
-
-$events = $req->fetchAll();
-
-if (isset($_POST['eq_save'])) {
-  $eq_name = !empty($_POST['eq_name']) ? trim($_POST['eq_name']) : null;
-  $eq_purpose = !empty($_POST['eq_purpose']) ? trim($_POST['eq_purpose']) : null;
-  $eq_freq = !empty($_POST['eq_freq']) ? trim($_POST['eq_freq']) : null;
-  $company_id = !empty($_POST['company_id']) ? trim($_POST['company_id']) : null;
-  $sql = "INSERT INTO `equipment`(`company_id`, `name`, `purpose`, `maintenance_freq`)
-  VALUES('$company_id', '$eq_name', '$eq_purpose', '$eq_freq')";
-  $stmt = $pdo->prepare($sql);
-  $result = $stmt->execute();
-  if ($result) {
-      ?>
-    <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-    <strong>Yeni ekipman başarıyla eklendi!</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-      <span aria-hidden="true">&times;</span>
-    </button>
-    </div>
-    <?php
-  }
-}
-
-if (isset($_POST['add_worker'])) {
-  $worker_name = !empty($_POST['worker_name']) ? trim($_POST['worker_name']) : null;
-  $worker_tc = !empty($_POST['worker_tc']) ? trim($_POST['worker_tc']) : null;
-  $worker_position= !empty($_POST['worker_position']) ? trim($_POST['worker_position']) : null;
-  $worker_sex = !empty($_POST['worker_sex']) ? trim($_POST['worker_sex']) : null;
-  $worker_mail = !empty($_POST['worker_mail']) ? trim($_POST['worker_mail']) : null;
-  $worker_phone = !empty($_POST['worker_phone']) ? trim($_POST['worker_phone']) : null;
-  $worker_contract_date = !empty($_POST['worker_contract_date']) ? trim($_POST['worker_contract_date']) : null;
-  $worker_contract_date = date('Y-m-d');
-
-  $sql = "SELECT COUNT(tc) AS num FROM coop_workers WHERE tc = :tc";
-  $stmt = $pdo->prepare($sql);
-  $stmt->bindValue(':tc', $worker_tc);
-  $stmt->execute();
-  $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-  if ($row['num'] > 0) {
-      ?>
-    <div class="alert alert-danger alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-    <strong>Bu T.C Kimlik Numarası ile daha önce kayıt yapıldı!</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-      <span aria-hidden="true">&times;</span>
-    </button>
-    </div>
-    <?php
-      }
-  else {
-      $sql = "INSERT INTO `coop_workers`(`name`, `tc`, `position`, `sex`, `mail`, `phone`, `contract_date`,`company_id`)
-      VALUES('$worker_name', '$worker_tc', '$worker_position', '$worker_sex', '$worker_mail', '$worker_phone', '$worker_contract_date','$company_id')";
-      $stmt = $pdo->prepare($sql);
-      $result = $stmt->execute();
-      if ($result) {
-        mkdir("$worker_tc", 0777);
-          ?>
-        <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-        <strong>Yeni çalışan başarıyla eklendi!</strong>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
-        <?php
-      }
-  }
-}
-
-if (isset($_POST['deleteWorkerButton'])) {
-  $worker_tc = $_POST['TCWillDelete'];
-
-    $sql = "UPDATE `coop_workers` SET `deleted` = 1 WHERE `company_id` = '$company_id' AND `tc` = '$worker_tc'";
-    $stmt = $pdo->prepare($sql);
-    $result = $stmt->execute();
-    if ($result) {
-        ?>
-      <div class="alert alert-danger alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-        <strong>Çalışan Silindi!</strong>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-        <?php
-    }
-}
-
-if (isset($_POST['recruitAgain'])) {
-  $worker_tc = $_POST['TCWillRecruit'];
-
-    $sql = "UPDATE `coop_workers` SET `deleted` = 0 WHERE `company_id` = '$company_id' AND `tc` = '$worker_tc'";
-    $stmt = $pdo->prepare($sql);
-    $result = $stmt->execute();
-    if ($result) {
-        ?>
-      <div class="alert alert-success alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-        <strong>Çalışan Tekrak Eklendi!</strong>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-        <?php
-    }
-}
-
-if (isset($_FILES['ziyaret_dosyası']) && isset($_POST['ziyaret_dosyası_yukle'])) {
-  $rapor_adi = $_POST['visit_report_name'];
-  $rapor_tarihi = $_POST['visit_report_date'];
-  $dosya_id = rand(0, 9999);
-  $file= $_FILES['ziyaret_dosyası'];
-  $fileName = $_FILES['ziyaret_dosyası']['name'];
-  $fileTmp = $_FILES['ziyaret_dosyası']['tmp_name'];
-  $fileSize = $_FILES['ziyaret_dosyası']['size'];
-  $filesError = $_FILES['ziyaret_dosyası']['error'];
-  $fileType = $_FILES['ziyaret_dosyası']['type'];
-
-  $fileExt = explode('.',$_FILES['ziyaret_dosyası']['name']);
-  $fileActualExt = strtolower(end($fileExt));
-  $allowed = array('xlsx','xls','odt','odf','ods','pdf','docx','doc','txt','jpg','jpeg','png','ppt','pptx');
-  if(in_array($fileActualExt,$allowed)){
-      if($_FILES['ziyaret_dosyası']['error'] ===  0){
-        $fileNameNew = $rapor_tarihi."_".$rapor_adi."_".$dosya_id;
-        $fileDestination = __DIR__.'/ziyaret_raporlari/'.$fileNameNew.".".$fileActualExt;
-        while (file_exists("ziyaret_raporlari/".$fileNameNew.".".$fileActualExt)) {
-          $dosya_id = rand(0, 9999999999);
-          $fileNameNew = $rapor_tarihi."_".$rapor_adi."_".$dosya_id;
-        }
-
-        move_uploaded_file($_FILES['ziyaret_dosyası']['tmp_name'],$fileDestination);
-
-        ?>
-        <div class='alert alert-primary alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-          <strong>Dosyanız yüklendi</strong>
-          <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-            <span aria-hidden='true'>&times;</span>
-          </button>
-        </div>
-        <?php
-      }else{
-        ?>
-        <div class='alert alert-danger alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-          <strong>Dosya yüklenirken bir hata ile karşılaşıldı!Lütfen daha sonra tekrar deneiyiniz! Sorun devam ederse sistem yöneticinizle görüşün.</strong>
-          <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-            <span aria-hidden='true'>&times;</span>
-          </button>
-        </div>
-        <?php
-      }
-  }else{
-    ?>
-    <div class='alert alert-danger alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-      Dosya türü uygun değil. Lütfen <b>'xlsx','xls','odt','odf','ods','pdf','docx','doc','txt','jpg','jpeg','png','ppt','pptx'</b> türündeki dosyaları yükleyin!
-      <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-        <span aria-hidden='true'>&times;</span>
-      </button>
-    </div>
-    <?php
-  }
-}
-
-if (isset($_FILES['calisan_dosya']) && isset($_POST['calisan_dosya_yukle'])) {
-  $cdir_name = !empty($_POST['cdir_name']) ? trim($_POST['cdir_name']) : null;
-  $current_dir = getcwd();
-  $current_dir = $current_dir.'/'.$cdir_name;
-  $file= $_FILES['calisan_dosya'];
-  $fileName = $_FILES['calisan_dosya']['name'];
-  $fileTmp = $_FILES['calisan_dosya']['tmp_name'];
-  $fileSize = $_FILES['calisan_dosya']['size'];
-  $filesError = $_FILES['calisan_dosya']['error'];
-  $fileType = $_FILES['calisan_dosya']['type'];
-
-  $fileExt = explode('.',$_FILES['calisan_dosya']['name']);
-  $fileActualExt = strtolower(end($fileExt));
-  $allowed = array('xlsx','xls','odt','odf','ods','pdf','docx','doc','txt','jpg','jpeg','png','ppt','pptx');
-  if(in_array($fileActualExt,$allowed)){
-      if($_FILES['calisan_dosya']['error'] ===  0){
-        $fileNameNew = date("Y-m-d_h:i:sa").".".$fileName;
-        $fileDestination = $current_dir.'/'.$fileNameNew;
-        move_uploaded_file($_FILES['calisan_dosya']['tmp_name'],$fileDestination);
-
-        ?>
-        <div class='alert alert-primary alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-          <strong>Dosyanız yüklendi</strong>
-          <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-            <span aria-hidden='true'>&times;</span>
-          </button>
-        </div>
-        <?php
-      }else{
-        ?>
-        <div class='alert alert-danger alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-          <strong>Dosya yüklenirken bir hata ile karşılaşıldı!Lütfen daha sonra tekrar deneiyiniz! Sorun devam ederse sistem yöneticinizle görüşün.</strong>
-          <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-            <span aria-hidden='true'>&times;</span>
-          </button>
-        </div>
-        <?php
-      }
-  }else{
-    ?>
-    <div class='alert alert-danger alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-      Dosya türü uygun değil. Lütfen <b>'xlsx','xls','odt','odf','ods','pdf','docx','doc','txt','jpg','jpeg','png','ppt','pptx'</b> türündeki dosyaları yükleyin!
-      <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-        <span aria-hidden='true'>&times;</span>
-      </button>
-    </div>
-    <?php
-  }
-}
-
-if(isset($_FILES['calisan_list']) && isset($_POST['calisan_yukle'])){
-    $current_dir = getcwd();
-    $file= $_FILES['calisan_list'];
-    $fileName = $_FILES['calisan_list']['name'];
-    $fileTmp = $_FILES['calisan_list']['tmp_name'];
-    $fileSize = $_FILES['calisan_list']['size'];
-    $filesError = $_FILES['calisan_list']['error'];
-    $fileType = $_FILES['calisan_list']['type'];
-
-    $fileExt = explode('.',$_FILES['calisan_list']['name']);
-    $fileActualExt = strtolower(end($fileExt));
-    $allowed = array('xlsx','xls','ods');
-    if(in_array($fileActualExt,$allowed)){
-        if($_FILES['calisan_list']['error'] ===  0){
-          $fileNameNew = $isim."_calisanlar".".".$fileActualExt;
-          $fileDestination = $current_dir.'/'.$fileNameNew;
-          $basarili = move_uploaded_file($_FILES['calisan_list']['tmp_name'],$fileDestination);
-          if ($basarili) {
-            $ext = mb_convert_case($fileActualExt, MB_CASE_TITLE, "UTF-8");
-
-            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($ext);
-            $reader->setReadDataOnly(TRUE);
-            $spreadsheet = $reader->load($fileNameNew);
-
-            $worksheet = $spreadsheet->getActiveSheet();
-            // Get the highest row and column numbers referenced in the worksheet
-            $highestRow = $worksheet->getHighestRow(); // e.g. 10
-            $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
-            $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn); // e.g. 5
-
-            for ($row = 2; $row <= $highestRow; ++$row) {
-                    $value1 = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
-                    $value2 = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
-                    $value3 = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
-                    $value4 = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
-                    $value5 = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
-                    $value6 = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
-                    $value7 = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
-                    $value7 = date('Y-m-d');
-                $sql = "INSERT INTO `coop_workers`(`name`, `position`, `sex`, `tc`, `phone`, `mail`, `contract_date`,`company_id`)
-                VALUES('$value1', '$value2', '$value3', '$value4', '$value5', '$value6', '$value7','$company_id')";
-                $stmt = $pdo->prepare($sql);
-                $result = $stmt->execute();
-                if ($result) {
-                  mkdir("$value4", 0777);
-            }
-          }
-        }
-
-          ?>
-          <div class='alert alert-primary alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-            <strong>Dosyanız yüklendi ve çalışanlarınız kaydedildi</strong>
-            <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-              <span aria-hidden='true'>&times;</span>
-            </button>
-          </div>
-          <?php
-        }else{
-          ?>
-          <div class='alert alert-danger alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-            <strong>Dosya yüklenirken bir hatayla karşılaşıldı!Lütfen daha sonra tekra deneiyiniz! Sorun devam ederse sistem yöneticinizle görüşün.</strong>
-            <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-              <span aria-hidden='true'>&times;</span>
-            </button>
-          </div>
-          <?php
-        }
-    }else{
-      ?>
-      <div class='alert alert-danger alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>
-        Dosya türü uygun değil. Lütfen <b>'xlsx' , 'xls' , 'ods'</b> türündeki dosyaları yükleyin!
-        <button type='button' class='close' data-dismiss='alert' aria-label='Close' padding='auto'>
-          <span aria-hidden='true'>&times;</span>
-        </button>
-      </div>
-      <?php
-    }
-}
-
-if (isset($_POST['kaydet'])) {
-    $comp_type = !empty($_POST['comp_type']) ? trim($_POST['comp_type']) : null;
-    $name = $isim;
-    $email = !empty($_POST['mail']) ? trim($_POST['mail']) : null;
-    $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
-    $city = !empty($_POST['countrySelect']) ? trim($_POST['countrySelect']) : null;
-    $town = !empty($_POST['citySelect']) ? trim($_POST['citySelect']) : null;
-    $address = !empty($_POST['address']) ? trim($_POST['address']) : null;
-    $uzman_id = !empty($_POST['uzman']) ? trim($_POST['uzman']) : 0;
-    $hekim_id = !empty($_POST['hekim']) ? trim($_POST['hekim']) : 0;
-    $saglık_p_id = !empty($_POST['saglık']) ? trim($_POST['saglık']) : 0;
-    $ofis_p_id = !empty($_POST['ofis']) ? trim($_POST['ofis']) : 0;
-    $muhasebe_p_id = !empty($_POST['muhasebe']) ? trim($_POST['muhasebe']) : 0;
-    $contract_date = !empty($_POST['contract_date']) ? trim($_POST['contract_date']) : null;
-    $remi_freq = !empty($_POST['remi_freq']) ? trim($_POST['remi_freq']) : 0;
-    $changer = $un;
-
-    $uzman_id_2 = !empty($_POST['uzman_2']) ? trim($_POST['uzman_2']) : 0;
-    $uzman_id_3 = !empty($_POST['uzman_3']) ? trim($_POST['uzman_3']) : 0;
-
-    $hekim_id_2 = !empty($_POST['hekim_2']) ? trim($_POST['hekim_2']) : 0;
-    $hekim_id_3 = !empty($_POST['hekim_3']) ? trim($_POST['hekim_3']) : 0;
-
-    $saglık_p_id_2 = !empty($_POST['saglık_2']) ? trim($_POST['saglık_2']) : 0;
-
-    $ofis_p_id_2 = !empty($_POST['ofis_2']) ? trim($_POST['ofis_2']) : 0;
-
-    $muhasebe_p_id_2 = !empty($_POST['muhasebe_2']) ? trim($_POST['muhasebe_2']) : 0;
-
-    $nace_kodu = !empty($_POST['nace_kodu']) ? trim($_POST['nace_kodu']) : 0;
-    $mersis_no = !empty($_POST['mersis_no']) ? trim($_POST['mersis_no']) : 0;
-    $sgk_sicil = !empty($_POST['sgk_sicil']) ? trim($_POST['sgk_sicil']) : 0;
-    $vergi_no = !empty($_POST['vergi_no']) ? trim($_POST['vergi_no']) : 0;
-    $vergi_dairesi = !empty($_POST['vergi_dairesi']) ? trim($_POST['vergi_dairesi']) : null;
-    $katip_is_yeri_id = !empty($_POST['katip_is_yeri_id']) ? trim($_POST['katip_is_yeri_id']) : 0;
-    $katip_kurum_id = !empty($_POST['katip_kurum_id']) ? trim($_POST['katip_kurum_id']) : 0;
-
-    $sql = "INSERT INTO `coop_companies`
-    (`comp_type`, `name`, `mail`, `phone`,`address`, `city`, `town`, `contract_date`, `uzman_id`, `uzman_id_2`, `uzman_id_3`, `hekim_id`,`hekim_id_2`,
-       `hekim_id_3`,`saglık_p_id`,`saglık_p_id_2`,`ofis_p_id`,`ofis_p_id_2`,`muhasebe_p_id`,`muhasebe_p_id_2`, `change`, `remi_freq`,`changer`)
-   VALUES
-   ('$comp_type', '$name', '$email', '$phone', '$address', '$city', '$town', '$contract_date', '$uzman_id', '$uzman_id_2', '$uzman_id_3',
-     '$hekim_id', '$hekim_id_2', '$hekim_id_3', '$saglık_p_id', '$saglık_p_id_2', '$ofis_p_id', '$ofis_p_id_2',
-     '$muhasebe_p_id', '$muhasebe_p_id_2', '0', '$remi_freq','$changer')";
-    $stmt = $pdo->prepare($sql);
-
-    $result = $stmt->execute();
-    if ($result) {
-        ?>
-  <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-    <strong>İşletmenizde yaptığınız değişiklikler firma yöneticinize iletilmiştir. İstek onaylandıktan sonra firma değişiklikleri uygulanacaktır. Onaylanana kadar yaptığınız işlemler kayıt edilmez. Lütfen onaylanmasını bekleyiniz!</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <?php
-      }
-  }
-
-if (isset($_POST['sil'])) {
-  $comp_type = !empty($_POST['comp_type']) ? trim($_POST['comp_type']) : null;
-  $name = $isim;
-  $email = !empty($_POST['mail']) ? trim($_POST['mail']) : null;
-  $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
-  $city = !empty($_POST['countrySelect']) ? trim($_POST['countrySelect']) : null;
-  $town = !empty($_POST['citySelect']) ? trim($_POST['citySelect']) : null;
-  $address = !empty($_POST['address']) ? trim($_POST['address']) : null;
-  $uzman_id = !empty($_POST['uzman']) ? trim($_POST['uzman']) : 0;
-  $hekim_id = !empty($_POST['hekim']) ? trim($_POST['hekim']) : 0;
-  $saglık_p_id = !empty($_POST['saglık']) ? trim($_POST['saglık']) : 0;
-  $ofis_p_id = !empty($_POST['ofis']) ? trim($_POST['ofis']) : 0;
-  $muhasebe_p_id = !empty($_POST['muhasebe']) ? trim($_POST['muhasebe']) : 0;
-  $contract_date = !empty($_POST['contract_date']) ? trim($_POST['contract_date']) : null;
-  $remi_freq = !empty($_POST['remi_freq']) ? trim($_POST['remi_freq']) : 0;
-  $changer = $un;
-
-  $uzman_id_2 = !empty($_POST['uzman_2']) ? trim($_POST['uzman_2']) : 0;
-  $uzman_id_3 = !empty($_POST['uzman_3']) ? trim($_POST['uzman_3']) : 0;
-
-  $hekim_id_2 = !empty($_POST['hekim_2']) ? trim($_POST['hekim_2']) : 0;
-  $hekim_id_3 = !empty($_POST['hekim_3']) ? trim($_POST['hekim_3']) : 0;
-
-  $saglık_p_id_2 = !empty($_POST['saglık_2']) ? trim($_POST['saglık_2']) : 0;
-
-  $ofis_p_id_2 = !empty($_POST['ofis_2']) ? trim($_POST['ofis_2']) : 0;
-
-  $muhasebe_p_id_2 = !empty($_POST['muhasebe_2']) ? trim($_POST['muhasebe_2']) : 0;
-
-  $nace_kodu = !empty($_POST['nace_kodu']) ? trim($_POST['nace_kodu']) : 0;
-  $mersis_no = !empty($_POST['mersis_no']) ? trim($_POST['mersis_no']) : 0;
-  $sgk_sicil = !empty($_POST['sgk_sicil']) ? trim($_POST['sgk_sicil']) : 0;
-  $vergi_no = !empty($_POST['vergi_no']) ? trim($_POST['vergi_no']) : 0;
-  $vergi_dairesi = !empty($_POST['vergi_dairesi']) ? trim($_POST['vergi_dairesi']) : null;
-  $katip_is_yeri_id = !empty($_POST['katip_is_yeri_id']) ? trim($_POST['katip_is_yeri_id']) : 0;
-  $katip_kurum_id = !empty($_POST['katip_kurum_id']) ? trim($_POST['katip_kurum_id']) : 0;
-
-  $sql = "INSERT INTO `coop_companies`
-  (`comp_type`, `name`, `mail`, `phone`,`address`, `city`, `town`, `contract_date`, `uzman_id`, `uzman_id_2`, `uzman_id_3`, `hekim_id`,`hekim_id_2`,
-     `hekim_id_3`,`saglık_p_id`,`saglık_p_id_2`,`ofis_p_id`,`ofis_p_id_2`,`muhasebe_p_id`,`muhasebe_p_id_2`, `change`, `remi_freq`,`changer`)
- VALUES
- ('$comp_type', '$name', '$email', '$phone', '$address', '$city', '$town', '$contract_date', '$uzman_id', '$uzman_id_2', '$uzman_id_3',
-   '$hekim_id', '$hekim_id_2', '$hekim_id_3', '$saglık_p_id', '$saglık_p_id_2', '$ofis_p_id', '$ofis_p_id_2',
-   '$muhasebe_p_id', '$muhasebe_p_id_2', '2', '$remi_freq','$changer')";
-  $stmt = $pdo->prepare($sql);
-
-  $result = $stmt->execute();
-  if ($result) {
-      ?>
-  <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-    <strong>İşletmenizde yaptığınız değişiklikler firma yöneticinize iletilmiştir. İstek onaylandıktan sonra firma değişiklikleri uygulanacaktır. Onaylanana kadar yaptığınız işlemler kayıt edilmez. Lütfen onaylanmasını bekleyiniz!</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <?php
-      }
-}
-
+require '../../../connect.php';
+require '../core/baslangic.php';
+require '../core/scripts.html';
 ?>
 <!DOCTYPE html>
 <html>
@@ -569,7 +88,6 @@ if (isset($_POST['sil'])) {
 </head>
 
 <body id="page-top">
-  <div>
     <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
       <img width="55" height="40" class="rounded-circle img-profile" src="../../assets/img/nav_brand.jpg" />
       <a class="navbar-brand" title="Anasayfa" style="color: black;" href="../../index.php"><b>Özgür OSGB</b></a>
@@ -664,34 +182,35 @@ if (isset($_POST['sil'])) {
           <h1><b><?= mb_convert_case($isim, MB_CASE_TITLE, "UTF-8")?></b></h1>
           <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" id="gb-tab" data-toggle="tab" href="#genel_bilgiler" role="tab" aria-controls="Genel Bilgiler" aria-selected="true"><b>Genel Bilgiler</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'genel_bilgiler' ? 'active' : ''; ?>" id="gb-tab" data-toggle="tab" href="#genel_bilgiler" role="tab" aria-controls="Genel Bilgiler" aria-selected="true"><b>Genel Bilgiler</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="oc-tab" data-toggle="tab" href="#osgb_calisanlar" role="tab" aria-controls="OSGB Çalışanları" aria-selected="false"><b>OSGB Çalışanları</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'osgb_calisanlar' ? 'active' : ''; ?>" id="oc-tab" data-toggle="tab" href="#osgb_calisanlar" role="tab" aria-controls="OSGB Çalışanları" aria-selected="false"><b>OSGB Çalışanları</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="db-tab" data-toggle="tab" href="#devlet_bilgileri" role="tab" aria-controls="Devlet Bilgileri" aria-selected="false"><b>Devlet Bilgileri</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'devlet_bilgileri' ? 'active' : ''; ?>" id="db-tab" data-toggle="tab" href="#devlet_bilgileri" role="tab" aria-controls="Devlet Bilgileri" aria-selected="false"><b>Devlet Bilgileri</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="ic-tab" data-toggle="tab" href="#isletme_calisanlar" role="tab" aria-controls="İşletme Çalışanları" aria-selected="false"><b>İşletme Çalışanları</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'isletme_calisanlar' ? 'active' : ''; ?>" id="ic-tab" data-toggle="tab" href="#isletme_calisanlar" role="tab" aria-controls="İşletme Çalışanları" aria-selected="false"><b>İşletme Çalışanları</b></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link <?php echo $_GET['tab'] === 'isletme_takvim' ? 'active' : ''; ?>" id="it-tab" data-toggle="tab" href="#isletme_takvim" role="tab" aria-controls="İşletme Takvimi" aria-selected="false"><b>İşletme Takvimi</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="it-tab" data-toggle="tab" href="#isletme_takvim" role="tab" aria-controls="İşletme Takvimi" aria-selected="false"><b>İşletme Takvimi</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'isletme_ekipman' ? 'active' : ''; ?>" id="ie-tab" data-toggle="tab" href="#isletme_ekipman" role="tab" aria-controls="İşletme Ekipmanları" aria-selected="false"><b>İşletme Ekipmanları</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="ie-tab" data-toggle="tab" href="#isletme_ekipman" role="tab" aria-controls="İşletme Ekipmanları" aria-selected="false"><b>İşletme Ekipmanları</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="ir-tab" data-toggle="tab" href="#isletme_rapor" role="tab" aria-controls="İşletme Raporları" aria-selected="false"><b>İşletme Raporları</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="ir-tab" data-toggle="tab" href="#isletme_rapor" role="tab" aria-controls="İşletme Raporları" aria-selected="false"><b>İşletme Raporları</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'ziyaret_rapor' ? 'active' : ''; ?>" id="zr-tab" data-toggle="tab" href="#ziyaret_rapor" role="tab" aria-controls="Ziyaret Raporları" aria-selected="false"><b>Ziyaret Raporları</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="zr-tab" data-toggle="tab" href="#ziyaret_rapor" role="tab" aria-controls="Ziyaret Raporları" aria-selected="false"><b>Ziyaret Raporları</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'tamamlanan_rapor' ? 'active' : ''; ?>" id="tr-tab" data-toggle="tab" href="#tamamlanan_rapor" role="tab" aria-controls="Tamamlanan Raporlar" aria-selected="false"><b>Tamamlanan Raporlar</b></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="tr-tab" data-toggle="tab" href="#tamamlanan_rapor" role="tab" aria-controls="Tamamlanan Raporlar" aria-selected="false"><b>Tamamlanan Raporlar</b></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="sc-tab" data-toggle="tab" href="#silinen_calisanlar" role="tab" aria-controls="Silinen Çalışanlar" aria-selected="false"><b>Silinen Çalışanlar</b></a>
+                <a class="nav-link <?php echo $_GET['tab'] === 'silinen_calisanlar' ? 'active' : ''; ?>" id="sc-tab" data-toggle="tab" href="#silinen_calisanlar" role="tab" aria-controls="Silinen Çalışanlar"><b>Silinen Çalışanlar</b></a>
             </li>
           </ul>
         </div>
@@ -703,8 +222,9 @@ if (isset($_POST['sil'])) {
             foreach ($companies as $company) {}
             ?>
           <div class="tab-content" id="myTabContent">
+
             <!--Genel Bilgiler -->
-            <div class="tab-pane fade show active" id="genel_bilgiler" role="tabpanel" aria-labelledby="gb-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'genel_bilgiler' ? 'active' : ''; ?>" id="genel_bilgiler" role="tabpanel" aria-labelledby="gb-tab">
                 <form action="index.php" method="POST">
                   <fieldset id="gb_form">
                     <div class="form-row">
@@ -884,7 +404,7 @@ if (isset($_POST['sil'])) {
             </div><!--işletme_bilgileri end-->
 
             <!--OSGB Çalışanları -->
-            <div class="tab-pane fade" id="osgb_calisanlar" role="tabpanel" aria-labelledby="oc-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'osgb_calisanlar' ? 'active' : ''; ?>" id="osgb_calisanlar" role="tabpanel" aria-labelledby="oc-tab">
               <form action="index.php" method="POST">
                   <fieldset id="oc_form">
                     <!--İsg Uzmanları -->
@@ -1353,7 +873,7 @@ if (isset($_POST['sil'])) {
             </div>
 
             <!--Devlet Bilgileri -->
-            <div class="tab-pane fade" id="devlet_bilgileri" role="tabpanel" aria-labelledby="db-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'devlet_bilgileri' ? 'active' : ''; ?>" id="devlet_bilgileri" role="tabpanel" aria-labelledby="db-tab">
               <form action="index.php" method="POST">
                 <fieldset id="db_form">
                 <div class="row col-lg-12">
@@ -1416,18 +936,22 @@ if (isset($_POST['sil'])) {
             </div>
 
             <!--İşletme Çalışanları -->
-            <div class="tab-pane fade" id="isletme_calisanlar" role="tabpanel" aria-labelledby="ic-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_calisanlar' ? 'active' : ''; ?>" id="isletme_calisanlar" role="tabpanel" aria-labelledby="ic-tab">
               <?php
                 if (file_exists($isim."_calisanlar.xlsx") || file_exists($isim."_calisanlar.xls") || file_exists($isim."_calisanlar.ods")){
                   ?>
                   <button class="btn btn-primary" id="ic_form2" data-toggle="modal" data-target="#addWorker" data-whatever="@getbootstrap">Yeni Çalışan Ekle</button>
+                  <br><b>Çalışana ait dosyalara erişmek için çalışanın isminin yazılı olduğu kutucuğa tıklayabilirsiniz</b>
+
                   <?php
                 }
                 else {
                   ?>
-                <form method="POST" action="index.php" enctype="multipart/form-data" >
+                <form method="POST" action="../core/addWorkerList.php" enctype="multipart/form-data" >
                   <fieldset id="ic_form1">
                     <label for="calisan_list"><b>Çalışan Listesi Yükle-></b></label>
+                    <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                    <input type="text" name="company_name" value="<?= $isim ?>" hidden>
                     <input type="file" class="btn btn-light btn-sm" name="calisan_list" />
                     <input type="submit" class="btn btn-primary" name="calisan_yukle" value="Yükle"/>
                   </fieldset>
@@ -1435,7 +959,7 @@ if (isset($_POST['sil'])) {
                 <?php
                   }
                    ?>
-                  <input type="text" class="form-control" style="float:right;max-width:600px;" id="myInput" onkeyup="myFunction()" placeholder="Çalışan Adı ile ara...">
+                  <input type="text" class="form-control" style="float:right;max-width:600px; margin-bottom:15px;" id="myInput" onkeyup="myFunction()" placeholder="Çalışan Adı ile ara...">
                   <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
                     <table class="table table-striped table-bordered table-hover" id="dataTable">
                       <thead class="thead-dark">
@@ -1457,17 +981,19 @@ if (isset($_POST['sil'])) {
                             $coworkers=$sorgu-> fetchAll(PDO::FETCH_OBJ);
                             foreach ($coworkers as $key=>$coworker) {
                                 ?>
-                          <tr data-toggle="modal" data-target="#b<?= $key ?>" data-whatever="@getbootstrap" style="cursor: pointer;">
-                            <td><?= $coworker->name ?></td>
+                          <tr>
+                            <td data-toggle="modal" data-target="#b<?= $key ?>" data-whatever="@getbootstrap" style="cursor: pointer;"><?= $coworker->name ?></td>
                             <td><?= $coworker->position ?></td>
                             <td><?= $coworker->sex ?></td>
                             <td><?= $coworker->tc ?></td>
                             <td><?= $coworker->phone ?></td>
                             <td><?= $coworker->mail ?></td>
                             <td><?= $coworker->contract_date ?></td>
-                            <form action="index.php" method="POST">
-                                <input type="number" name="TCWillDelete" value="<?= $coworker->tc ?>" hidden readonly>
-                                <td id="delete_worker_row"><button class="btn btn-danger" type="submit" name="deleteWorkerButton" id="deleteWorkerButton">Sil</button></td>
+                            <form action="../core/deleteWorker.php" method="POST">
+                              <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                              <input type="text" name="company_name" value="<?= $isim ?>" hidden>
+                              <input type="number" name="TCWillDelete" value="<?= $coworker->tc ?>" hidden readonly>
+                              <td><button class="btn btn-danger" type="submit" name="deleteWorkerButton" id="deleteWorkerButton">Sil</button></td>
                             </form>
                           </tr>
                           <!-- Çalışan Dosyaları -->
@@ -1493,10 +1019,12 @@ if (isset($_POST['sil'])) {
                                           ?>
                                         </div>
                                         <div class="modal-footer bg-light">
-                                          <form method="POST" action="index.php" enctype="multipart/form-data" >
+                                          <form method="POST" action="../core/addWorkerFile.php" enctype="multipart/form-data" >
                                             <fieldset id="ic_form3">
                                               <label for="calisan_dosya"><b>Yeni Dosya Yükle-></b></label>
-                                              <input name="cdir_name" type="tel" value="<?= $coworker->tc ?>" hidden>
+                                              <input name="coworker_tc" type="tel" value="<?= $coworker->tc ?>" hidden>
+                                              <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                                              <input type="text" name="company_name" value="<?= $isim ?>" hidden>
                                               <input type="file" class="btn btn-light btn-sm" name="calisan_dosya" required />
                                               <input type="submit" class="btn btn-primary" name="calisan_dosya_yukle" value="Yükle"/>
                                             </fieldset>
@@ -1525,12 +1053,12 @@ if (isset($_POST['sil'])) {
             </div>
 
             <!--İşletme Takvimi -->
-            <div class="tab-pane fade" id="isletme_takvim" role="tabpanel" aria-labelledby="it-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_takvim' ? 'active' : ''; ?>" id="isletme_takvim" role="tabpanel" aria-labelledby="it-tab">
               <div id="calendar" style="margin: auto;" class="col-centered"></div>
             </div>
 
             <!--İşletme Ekipmanları -->
-            <div class="tab-pane fade" id="isletme_ekipman" role="tabpanel" aria-labelledby="ie-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_ekipman' ? 'active' : ''; ?>" id="isletme_ekipman" role="tabpanel" aria-labelledby="ie-tab">
               <button class="btn btn-primary" id="ie_button" data-toggle="modal" data-target="#addEquipment" data-whatever="@getbootstrap">Yeni Ekipman Ekle</button>
               <input type="text" class="form-control" style="float:right;max-width:600px;" id="myInput" onkeyup="myFunction()" placeholder="Ekipman Adı ile ara...">
               <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
@@ -1575,17 +1103,17 @@ if (isset($_POST['sil'])) {
             </div>
 
             <!--İşletme Raporları -->
-            <div class="tab-pane fade" id="isletme_rapor" role="tabpanel" aria-labelledby="ir-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="isletme_rapor" role="tabpanel" aria-labelledby="ir-tab">
               isletme_rapor
             </div>
 
             <!--Tamamlanan Raporlar -->
-            <div class="tab-pane fade" id="tamamlanan_rapor" role="tabpanel" aria-labelledby="tr-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'tamamlanan_rapor' ? 'active' : ''; ?>" id="tamamlanan_rapor" role="tabpanel" aria-labelledby="tr-tab">
               tamamlanan_rapor
             </div>
 
             <!--Ziyaret Raporları -->
-            <div class="tab-pane fade" id="ziyaret_rapor" role="tabpanel" aria-labelledby="zr-tab">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'ziyaret_rapor' ? 'active' : ''; ?>" id="ziyaret_rapor" role="tabpanel" aria-labelledby="zr-tab">
               <button class="btn btn-primary" id="zr_form" data-toggle="modal" data-target="#addVisitReport" data-whatever="@getbootstrap">Yeni Ziyaret Raporu Ekle</button>
                 <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
                   <table class="table table-striped table-bordered table-hover table-sm" id="dataTable">
@@ -1625,8 +1153,9 @@ if (isset($_POST['sil'])) {
             </div>
 
             <!--Silinen Çalışanlar -->
-            <div class="tab-pane fade" id="silinen_calisanlar" role="tabpanel" aria-labelledby="tr-tab">
-              <input type="text" class="form-control" style="float:right;max-width:600px;" id="myInput" onkeyup="myFunction()" placeholder="Çalışan Adı ile ara...">
+            <div class="tab-pane fade show <?php echo $_GET['tab'] === 'silinen_calisanlar' ? 'active' : ''; ?>" id="silinen_calisanlar" role="tabpanel" aria-labelledby="tr-tab">
+              <b>Çalışana ait dosyalara erişmek için çalışanın isminin yazılı olduğu kutucuğa tıklayabilirsiniz</b>
+              <input type="text" class="form-control" style="float:right;max-width:600px; margin-bottom:15px;" id="myInput" onkeyup="myFunction()" placeholder="Çalışan Adı ile ara...">
               <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
                 <table class="table table-striped table-bordered table-hover" id="dataTable">
                   <thead class="thead-dark">
@@ -1648,16 +1177,18 @@ if (isset($_POST['sil'])) {
                         $coworkers=$sorgu-> fetchAll(PDO::FETCH_OBJ);
                         foreach ($coworkers as $key=>$coworker) {
                             ?>
-                      <tr data-toggle="modal" data-target="#c<?= $key ?>" data-whatever="@getbootstrap" style="cursor: pointer;">
-                        <td><?= $coworker->name ?></td>
+                      <tr>
+                        <td data-toggle="modal" data-target="#c<?= $key ?>" data-whatever="@getbootstrap" style="cursor: pointer;"><?= $coworker->name ?></td>
                         <td><?= $coworker->position ?></td>
                         <td><?= $coworker->sex ?></td>
                         <td><?= $coworker->tc ?></td>
                         <td><?= $coworker->phone ?></td>
                         <td><?= $coworker->mail ?></td>
                         <td><?= $coworker->contract_date ?></td>
-                        <form action="index.php" method="POST">
+                        <form action="../core/recruitAgain.php" method="POST">
                           <td><button class="btn btn-success" type="submit" name="recruitAgain">Geri Al</button></td>
+                          <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                          <input type="text" name="company_name" value="<?= $isim ?>" hidden>
                           <input type="number" name="TCWillRecruit" value="<?= $coworker->tc ?>" hidden readonly>
                         </form>
                       </tr>
@@ -1714,11 +1245,354 @@ if (isset($_POST['sil'])) {
             </div>
           </div><!-- tab content end -->
         </div><!-- card body end -->
-        <form action="index.php" method="POST">
+
+            <!-- Yeni çalışan ekleme modal -->
+            <div class="modal fade" id="addWorker" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                  <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Çalışan Ekle</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form action="../core/addWorker.php" method="POST">
+                      <div class="row">
+                        <div class="col-6">
+                          <label for="worker_name"><h5><b>Çalışanın Adını ve Soyadını Giriniz</b></h5></label>
+                          <input name="worker_name" id="worker_name" class="form-control" type="text" maxlength="100" placeholder="Ad Soyad" required>
+                        </div>
+                        <div class="col-6">
+                          <label for="worker_tc"><h5><b>Çalışanın T.C Kimlik Numarasını Giriniz</b></h5></label>
+                          <input name="worker_tc" id="worker_tc" class="form-control" type="tel" maxlength="11" minlength="11" placeholder="T.C Kimlik No" required>
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row">
+                        <div class="col-6">
+                          <label for="worker_mail"><h5><b>Çalışanın E-mail adresini Giriniz</b></h5></label>
+                          <input name="worker_mail" id="worker_mail" class="form-control" type="email" maxlength="100" placeholder="E-mail" required>
+                        </div>
+                        <div class="col-6">
+                          <label for="worker_phone"><h5><b>Çalışanın Telefon Numarasını Giriniz</b></h5></label>
+                          <input name="worker_phone" id="worker_phone" class="form-control" type="tel" maxlength="11" minlength="11" placeholder="05XXXXXXXXX" required>
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row">
+                        <div class="col-6">
+                          <label for="worker_position"><h5><b>Çalışanın Posizyonu Giriniz</b></h5></label>
+                          <input name="worker_position" id="worker_position" class="form-control" type="text" maxlength="100" placeholder="Pozisyon" required>
+                        </div>
+                        <div class="col-6">
+                          <label for="worker_sex"><h5><b>Çalışanının Cinsiyetini Giriniz</b></h5></label>
+                          <select name="worker_sex" id="worker_sex" class="form-control" required>
+                            <option value="" disabled selected>Çalışanın Cinsiyeti</option>
+                            <option value="Erkek">Erkek</option>
+                            <option value="Kadın">Kadın</option>
+                          </select>
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row col-6">
+                        <label for="worker_contract_date"><h5><b>Çalışanın İşe Giriş Tarihi</b></h5></label>
+                        <input name="worker_contract_date" id="worker_contract_date" class="form-control" type="date" required>
+                      </div>
+                    </div>
+                      <div class="modal-footer bg-light">
+                        <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                        <input type="text" name="company_name" value="<?= $isim ?>" hidden>
+                        <button id="add_worker" name="add_worker" type="submit" style="float: right; width:150px;" class="btn btn-primary btn-lg">Ekle</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div> <!-- addWorker end-->
+
+            <!-- Yeni etkinlik ekleme modal-->
+            <div class="modal fade" id="ModalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                 <form class="form-horizontal" method="POST" action="../../calendar/core/add-event.php">
+                    <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Etkinlik Ekle</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                      <label for="title" class="col-sm-2 control-label">Başlık</label>
+                      <div class="col-sm-10">
+                        <input type="text" name="title" class="form-control" id="title" placeholder="Başlık">
+                      </div>
+                      </div>
+                      <div class="form-group">
+                      <label for="description" class="col-sm-4 control-label">Açıklama</label>
+                      <div class="col-sm-10">
+                        <input type="text" name="description" class="form-control" id="description" placeholder="Açıklama">
+                      </div>
+                      </div>
+                      <div class="form-group">
+                      <label for="color" class="col-sm-2 control-label">Renk</label>
+                      <div class="col-sm-10">
+                        <select name="color" class="form-control" id="color">
+                          <option style="color:#0071c5;" value="#0071c5">Lacivert</option>
+                          <option style="color:#40E0D0;" value="#40E0D0">Turkuaz</option>
+                          <option style="color:#008000;" value="#008000">Yeşil</option>
+                          <option style="color:#FFD700;" value="#FFD700">Sarı</option>
+                          <option style="color:#FF8C00;" value="#FF8C00">Turuncu</option>
+                          <option style="color:#FF0000;" value="#FF0000">Kırmızı</option>
+                          <option style="color:#000;" value="#000">Siyah</option>
+                        </select>
+                      </div>
+                      </div>
+                      <div class="container">
+                      <div class="row">
+                      <div class="form-group">
+                      <label for="start" class="col-sm-12 control-label">Başlangıç Tarihi</label>
+                      <div class="col-sm-12">
+                        <input type="text" name="start" class="form-control" id="start" readonly>
+                      </div>
+                      </div>
+                      <div class="form-group">
+                      <label for="end" class="col-sm-12 control-label">Sonlanma Tarihi</label>
+                      <div class="col-sm-12">
+                        <input type="text" name="end" class="form-control" id="end" readonly>
+                        <input type="number" name="company_id" id="company_id" value="<?= $company_id ?>" hidden readonly>
+                        <input type="number" name="user_id" id="user_id" value="<?= $id ?>" hidden readonly>
+                      </div>
+                      </div>
+                    </div>
+                    </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div><!-- ModalAdd end -->
+
+            <!-- Kayıtlı etkinliği düzenle modal -->
+            <div class="modal fade" id="ModalEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <form class="form-horizontal" method="POST" action="../../calendar/core/editEventTitle.php">
+                    <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Etkinliği Düzenle</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                      <input name="event_company_name" id="event_company_name" value="<?= $isim ?>" hidden readonly>
+                      <div class="form-group">
+                      <label for="title" class="col-sm-2 control-label">Başlık</label>
+                      <div class="col-sm-10">
+                        <input type="text" name="title" class="form-control" id="title" placeholder="Başlık">
+                      </div>
+                      </div>
+                      <div class="form-group">
+                      <label for="description" class="col-sm-4 control-label">Açıklama</label>
+                      <div class="col-sm-10">
+                        <input type="text" name="description" class="form-control" id="description" placeholder="Açıklama">
+                      </div>
+                      </div>
+                      <div class="form-group">
+                      <label for="color" class="col-sm-2 control-label">Renk</label>
+                      <div class="col-sm-10">
+                        <select name="color" class="form-control" id="color">
+                          <option style="color:#0071c5;" value="#0071c5">Lacivert</option>
+                          <option style="color:#40E0D0;" value="#40E0D0">Turkuaz</option>
+                          <option style="color:#008000;" value="#008000">Yeşil</option>
+                          <option style="color:#FFD700;" value="#FFD700">Sarı</option>
+                          <option style="color:#FF8C00;" value="#FF8C00">Turuncu</option>
+                          <option style="color:#FF0000;" value="#FF0000">Kırmızı</option>
+                          <option style="color:#000;" value="#000">Siyah</option>
+
+                        </select>
+                      </div>
+                      </div>
+                        <div class="form-group">
+                        <div class="col-sm-2">
+                          <label onclick="toggleCheck('check1');" class="label-off" for="check1" id="check1_label">
+                          Sil
+                        </label>
+                        <input class="nocheckbox" type="checkbox" id="check1" name="delete">
+                        </div>
+                      </div>
+                      <script>
+                        function toggleCheck(check) {
+                          if ($('#'+check).is(':checked')) {
+                            $('#'+check+'_label').removeClass('label-on');
+                            $('#'+check+'_label').addClass('label-off');
+                          } else {
+                            $('#'+check+'_label').addClass('label-on');
+                            $('#'+check+'_label').removeClass('label-off');
+                          }
+                        }
+                      </script>
+                      <input type="hidden" name="id" class="form-control" id="id">
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                    </div>
+                  </form>
+              </div>
+              </div>
+            </div><!-- ModalEdit end-->
+
+            <!-- Yeni Ziyaret Raporu Ekleme modal-->
+            <div class="modal fade" id="addVisitReport" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Ziyaret Raporu Ekle</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form action="../core/addVisitReport.php" method="POST" enctype="multipart/form-data">
+                      <div class="row col-12">
+                        <label for="visit_report_name"><h5><b>Raporun Adını Giriniz</b></h5></label>
+                        <input name="visit_report_name" id="visit_report_name" class="form-control" type="text" maxlength="20" placeholder="Rapor Adı" required>
+                      </div>
+                      <br>
+                      <div class="row col-12">
+                        <label for="visit_report_date"><h5><b>Raporun Tarihini Giriniz</b></h5></label>
+                        <input name="visit_report_date" id="visit_report_date" class="form-control" type="date" required>
+                      </div>
+                      <br>
+                      <div class="modal-footer">
+                        <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                        <input type="text" name="company_name" value="<?= $isim ?>" hidden>
+                        <input type="file" class="btn btn-sm" name="ziyaret_dosyası" id="ziyaret_dosyası" style="margin-right:auto;" required>
+                        <button type="submit" class="btn btn-primary" name="ziyaret_dosyası_yukle" id="ziyaret_dosyası_yukle">Yükle</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div><!-- addVisitReport end-->
+
+            <!-- Yeni Ekipman Ekle-->
+            <div class="modal fade" id="addEquipment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Ekipman Ekle</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <form action="../core/eqSave.php" method="POST">
+                    <div class="modal-body">
+                      <div class="row col-12">
+                        <label for="eq_name"><h5><b>Ekipmanın Adını Giriniz</b></h5></label>
+                        <input name="eq_name" id="eq_name" class="form-control" type="text" maxlength="100" placeholder="Ekipman Adı" required>
+                      </div>
+                      <br>
+                      <div class="row col-12">
+                        <label for="eq_purpose"><h5><b>Ekipmanın Kullanım Amacını Giriniz</b></h5></label>
+                        <input name="eq_purpose" id="eq_purpose" class="form-control" type="text" placeholder="Kullanım Amacı" required>
+                      </div>
+                      <br>
+                      <div class="row col-12">
+                        <label for="eq_freq"><h5><b>Ekipmanın Düzenli Kontrol Aralığını Giriniz</b></h5></label>
+                        <select name="eq_freq" id="eq_freq" class="form-control" required>
+                          <option value="" selected disabled>Kontrol Aralığı</option>
+                          <option value="1">1 Ay</option>
+                          <option value="2">2 Ay</option>
+                          <option value="3">3 Ay</option>
+                          <option value="4">4 Ay</option>
+                          <option value="5">5 Ay</option>
+                          <option value="6">6 Ay</option>
+                          <option value="7">7 Ay</option>
+                          <option value="8">8 Ay</option>
+                          <option value="9">9 Ay</option>
+                          <option value="10">10 Ay</option>
+                          <option value="11">11 Ay</option>
+                          <option value="12">12 Ay</option>
+                          <option value="18">18 Ay</option>
+                          <option value="24">24 Ay</option>
+                          <option value="36">36 Ay</option>
+                        </select>
+                      </div>
+                      <br>
+                    </div>
+                    <div class="modal-footer">
+                      <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                      <button type="submit" class="btn btn-primary" name="eq_save" id="eq_save">Kaydet</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div><!-- addEquipment end-->
+
+            <!-- Yeni Rapor Ekle-->
+            <div class="modal fade" id="addReport" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Rapor Hazırla</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <form action="index.php" method="POST">
+                    <div class="modal-body">
+                      <div class="row col-12">
+                        <label for="new_report"><h5><b>Rapor Seç</b></h5></label>
+                        <select name="new_report" id="new_report" class="form-control" required>
+                          <option value="" selected disabled>Rapor Seç</option>
+                          <option value="katip_sozlesme">İSG Katip Sözleşmeleri</option>
+                          <option value="yangın">Yangın Tatbikat Raporu</option>
+                          <option value="egitim_plan">Yıllık Eğitim Planı</option>
+                          <option value="calisma_plan">Yıllık Çalışma Planı(50 üstü)</option>
+                          <option value="takip_liste">Klasör Takip Listesi</option>
+                          <option value="tabela_liste">Tabela Listeleri</option>
+                          <optgroup label="Risk Analizi">
+                              <option value="ekip_atamasi">Ekip Ataması</option>
+                              <option value="risk_basla">Risk Değerlendirme Başlanması</option>
+                              <option value="ust_yonetim">Üst Yönetime Sunum</option>
+                              <option value="risk_tablo">Risk Analiz Tablosu</option>
+                            <option value="covid19">Covid 19 Risk Değerlendirme Raporu</option>
+                            <option value="sonuc">Sonuç Raporu</option>
+                          </optgroup>
+                          <optgroup label="Acil Durum Planı">
+                            <option value="acil_plan_kapak">Acil Durum Eylem Planı Kapak</option>
+                            <option value="acil_plan">Acil Durum Eylem Planı</option>
+                            <option value="acil_plan_sema">Acil Durum Şemları</option>
+                          </optgroup>
+                          <optgroup label="Sağlık Güvenlik Planı">
+                            <option value="sgp_kapak">SGP Kapak</option>
+                            <option value="sg_plan">Sağlık Güvenlik Planı</option>
+                            <option value="hazırlık">Hazırlık Koordinatörü</option>
+                            <option value="uygulama">Uygulama Koordinatörü</option>
+                          </optgroup>
+                          <option value="acil_ekip">Acil Durum Müdahale Ekipleri</option>
+                        </select>
+                      </div>
+                      <br>
+                    </div>
+                    <div class="modal-footer">
+                      <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                      <button type="submit" class="btn btn-primary" name="eq_save" id="eq_save">Hazırla</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div><!-- addEquipment end-->
+
+        <form action="../core/saveChanges.php" method="POST">
           <fieldset id="save_changes">
             <div class="card-footer bg-light border">
-              <button class="btn btn-primary" name="gb_kaydet" id="gb_kaydet" type="submit" style="float:left; height:60px; width:300px;">Bütün Değişiklikleri Kaydet*</button>
-              <button class="btn btn-danger" name="isletme_sil" id="isletme_sil" type="submit" style="float:right; height:60px; width:300px;">İşletmeyi Sil</button>
+              <input type="text" name="changer" value="<?= $un ?>" hidden>
+              <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+              <input type="text" name="company_name" value="<?= $isim ?>" hidden>
+              <button class="btn btn-primary" name="kaydet" id="kaydet" type="submit" style="float:left; height:60px; width:300px;">Bütün Değişiklikleri Kaydet*</button>
+              <button class="btn btn-danger" name="sil" id="sil" type="submit" style="float:right; height:60px; width:300px;">İşletmeyi Sil</button>
               <br><br><br>
               <p><b>*Lütfen işletmenizin bütün sayfalarındaki değişikliklerinizi tamamladıktan sonra bu butonu kullanın.Bu buton her sayfa için ayrı ayrı çalışmaz!</b></p>
             </div>
@@ -1726,293 +1600,15 @@ if (isset($_POST['sil'])) {
         </form>
       </div> <!--card end-->
 
-      <!-- Yeni çalışan ekleme modal -->
-      <div class="modal fade" id="addWorker" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-          <div class="modal-content">
-            <div class="modal-header bg-light">
-              <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Çalışan Ekle</b></h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form action="index.php" method="POST">
-                <div class="row">
-                  <div class="col-6">
-                    <label for="worker_name"><h5><b>Çalışanın Adını ve Soyadını Giriniz</b></h5></label>
-                    <input name="worker_name" id="worker_name" class="form-control" type="text" maxlength="100" placeholder="Ad Soyad" required>
-                  </div>
-                  <div class="col-6">
-                    <label for="worker_tc"><h5><b>Çalışanın T.C Kimlik Numarasını Giriniz</b></h5></label>
-                    <input name="worker_tc" id="worker_tc" class="form-control" type="tel" maxlength="11" minlength="11" placeholder="T.C Kimlik No" required>
-                  </div>
-                </div>
-                <br>
-                <div class="row">
-                  <div class="col-6">
-                    <label for="worker_mail"><h5><b>Çalışanın E-mail adresini Giriniz</b></h5></label>
-                    <input name="worker_mail" id="worker_mail" class="form-control" type="email" maxlength="100" placeholder="E-mail" required>
-                  </div>
-                  <div class="col-6">
-                    <label for="worker_phone"><h5><b>Çalışanın Telefon Numarasını Giriniz</b></h5></label>
-                    <input name="worker_phone" id="worker_phone" class="form-control" type="tel" maxlength="11" minlength="11" placeholder="05XXXXXXXXX" required>
-                  </div>
-                </div>
-                <br>
-                <div class="row">
-                  <div class="col-6">
-                    <label for="worker_position"><h5><b>Çalışanın Posizyonu Giriniz</b></h5></label>
-                    <input name="worker_position" id="worker_position" class="form-control" type="text" maxlength="100" placeholder="Pozisyon" required>
-                  </div>
-                  <div class="col-6">
-                    <label for="worker_sex"><h5><b>Çalışanının Cinsiyetini Giriniz</b></h5></label>
-                    <select name="worker_sex" id="worker_sex" class="form-control" required>
-                      <option value="" disabled selected>Çalışanın Cinsiyeti</option>
-                      <option value="Erkek">Erkek</option>
-                      <option value="Kadın">Kadın</option>
-                    </select>
-                  </div>
-                </div>
-                <br>
-                <div class="row col-6">
-                  <label for="worker_contract_date"><h5><b>Çalışanın İşe Giriş Tarihi</b></h5></label>
-                  <input name="worker_contract_date" id="worker_contract_date" class="form-control" type="date" required>
-                </div>
-              </div>
-                <div class="modal-footer bg-light">
-                  <button id="add_worker" name="add_worker" type="submit" style="float: right; width:150px;" class="btn btn-primary btn-lg">Ekle</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div> <!-- addWorker end-->
-
-      <!-- Yeni etkinlik ekleme modal-->
-      <div class="modal fade" id="ModalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-           <form class="form-horizontal" method="POST" action="../../calendar/core/add-event.php">
-              <div class="modal-header">
-              <h4 class="modal-title" id="myModalLabel">Etkinlik Ekle</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              </div>
-              <div class="modal-body">
-                <div class="form-group">
-                <label for="title" class="col-sm-2 control-label">Başlık</label>
-                <div class="col-sm-10">
-                  <input type="text" name="title" class="form-control" id="title" placeholder="Başlık">
-                </div>
-                </div>
-                <div class="form-group">
-                <label for="description" class="col-sm-2 control-label">Açıklama</label>
-                <div class="col-sm-10">
-                  <input type="text" name="description" class="form-control" id="description" placeholder="Açıklama">
-                </div>
-                </div>
-                <div class="form-group">
-                <label for="color" class="col-sm-2 control-label">Renk</label>
-                <div class="col-sm-10">
-                  <select name="color" class="form-control" id="color">
-                    <option style="color:#0071c5;" value="#0071c5">Lacivert</option>
-                    <option style="color:#40E0D0;" value="#40E0D0">Turkuaz</option>
-                    <option style="color:#008000;" value="#008000">Yeşil</option>
-                    <option style="color:#FFD700;" value="#FFD700">Sarı</option>
-                    <option style="color:#FF8C00;" value="#FF8C00">Turuncu</option>
-                    <option style="color:#FF0000;" value="#FF0000">Kırmızı</option>
-                    <option style="color:#000;" value="#000">Siyah</option>
-                  </select>
-                </div>
-                </div>
-                <div class="container">
-                <div class="row">
-                <div class="form-group">
-                <label for="start" class="col-sm-12 control-label">Başlangıç Tarihi</label>
-                <div class="col-sm-12">
-                  <input type="text" name="start" class="form-control" id="start" readonly>
-                </div>
-                </div>
-                <div class="form-group">
-                <label for="end" class="col-sm-12 control-label">Sonlanma Tarihi</label>
-                <div class="col-sm-12">
-                  <input type="text" name="end" class="form-control" id="end" readonly>
-                  <input type="number" name="company_id" id="company_id" value="<?= $company_id ?>" hidden readonly>
-                  <input type="number" name="user_id" id="user_id" value="<?= $id ?>" hidden readonly>
-                </div>
-                </div>
-              </div>
-              </div>
-              </div>
-              <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
-              <button type="submit" class="btn btn-primary">Kaydet</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div><!-- ModalAdd end -->
-
-      <!-- Kayıtlı etkinliği düzenle modal -->
-      <div class="modal fade" id="ModalEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <form class="form-horizontal" method="POST" action="../../calendar/core/editEventTitle.php">
-              <div class="modal-header">
-              <h4 class="modal-title" id="myModalLabel">Etkinliği Düzenle</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              </div>
-              <div class="modal-body">
-                <input name="event_company_name" id="event_company_name" value="<?= $isim ?>" hidden readonly>
-                <div class="form-group">
-                <label for="title" class="col-sm-2 control-label">Başlık</label>
-                <div class="col-sm-10">
-                  <input type="text" name="title" class="form-control" id="title" placeholder="Başlık">
-                </div>
-                </div>
-                <div class="form-group">
-                <label for="description" class="col-sm-2 control-label">Açıklama</label>
-                <div class="col-sm-10">
-                  <input type="text" name="description" class="form-control" id="description" placeholder="Açıklama">
-                </div>
-                </div>
-                <div class="form-group">
-                <label for="color" class="col-sm-2 control-label">Renk</label>
-                <div class="col-sm-10">
-                  <select name="color" class="form-control" id="color">
-                    <option style="color:#0071c5;" value="#0071c5">Lacivert</option>
-                    <option style="color:#40E0D0;" value="#40E0D0">Turkuaz</option>
-                    <option style="color:#008000;" value="#008000">Yeşil</option>
-                    <option style="color:#FFD700;" value="#FFD700">Sarı</option>
-                    <option style="color:#FF8C00;" value="#FF8C00">Turuncu</option>
-                    <option style="color:#FF0000;" value="#FF0000">Kırmızı</option>
-                    <option style="color:#000;" value="#000">Siyah</option>
-
-                  </select>
-                </div>
-                </div>
-                  <div class="form-group">
-                  <div class="col-sm-2">
-                    <label onclick="toggleCheck('check1');" class="label-off" for="check1" id="check1_label">
-                    Sil
-                  </label>
-                  <input class="nocheckbox" type="checkbox" id="check1" name="delete">
-                  </div>
-                </div>
-                <script>
-                  function toggleCheck(check) {
-                    if ($('#'+check).is(':checked')) {
-                      $('#'+check+'_label').removeClass('label-on');
-                      $('#'+check+'_label').addClass('label-off');
-                    } else {
-                      $('#'+check+'_label').addClass('label-on');
-                      $('#'+check+'_label').removeClass('label-off');
-                    }
-                  }
-                </script>
-                <input type="hidden" name="id" class="form-control" id="id">
-              </div>
-              <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
-              <button type="submit" class="btn btn-primary">Kaydet</button>
-              </div>
-            </form>
-        </div>
-        </div>
-      </div><!-- ModalEdit end-->
-
-      <!-- Yeni Ziyaret Raporu Ekleme modal-->
-      <div class="modal fade" id="addVisitReport" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header bg-light">
-              <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Ziyaret Raporu Ekle</b></h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form action="index.php" method="POST" enctype="multipart/form-data">
-                <div class="row col-12">
-                  <label for="visit_report_name"><h5><b>Raporun Adını Giriniz</b></h5></label>
-                  <input name="visit_report_name" id="visit_report_name" class="form-control" type="text" maxlength="20" placeholder="Rapor Adı" required>
-                </div>
-                <br>
-                <div class="row col-12">
-                  <label for="visit_report_date"><h5><b>Raporun Tarihini Giriniz</b></h5></label>
-                  <input name="visit_report_date" id="visit_report_date" class="form-control" type="date" required>
-                </div>
-                <br>
-                <div class="modal-footer">
-                  <input type="file" class="btn btn-sm" name="ziyaret_dosyası" id="ziyaret_dosyası" style="margin-right:auto;" required>
-                  <button type="submit" class="btn btn-primary" name="ziyaret_dosyası_yukle" id="ziyaret_dosyası_yukle">Yükle</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div><!-- addVisitReport end-->
-
-      <!-- Yeni Ekipman Ekle-->
-      <div class="modal fade" id="addEquipment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header bg-light">
-              <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Ekipman Ekle</b></h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <form action="index.php" method="POST">
-              <div class="modal-body">
-                <div class="row col-12">
-                  <label for="eq_name"><h5><b>Ekipmanın Adını Giriniz</b></h5></label>
-                  <input name="eq_name" id="eq_name" class="form-control" type="text" maxlength="100" placeholder="Ekipman Adı" required>
-                </div>
-                <br>
-                <div class="row col-12">
-                  <label for="eq_purpose"><h5><b>Ekipmanın Kullanım Amacını Giriniz</b></h5></label>
-                  <input name="eq_purpose" id="eq_purpose" class="form-control" type="text" required>
-                </div>
-                <br>
-                <div class="row col-12">
-                  <label for="eq_freq"><h5><b>Ekipmanın Düzenli Kontrol Aralığını Giriniz</b></h5></label>
-                  <select name="eq_freq" id="eq_freq" class="form-control" required>
-                    <option value="" selected disabled>Kontrol Aralığı</option>
-                    <option value="1">1 Ay</option>
-                    <option value="2">2 Ay</option>
-                    <option value="3">3 Ay</option>
-                    <option value="4">4 Ay</option>
-                    <option value="5">5 Ay</option>
-                    <option value="6">6 Ay</option>
-                    <option value="7">7 Ay</option>
-                    <option value="8">8 Ay</option>
-                    <option value="9">9 Ay</option>
-                    <option value="10">10 Ay</option>
-                    <option value="11">11 Ay</option>
-                    <option value="12">12 Ay</option>
-                    <option value="18">18 Ay</option>
-                    <option value="24">24 Ay</option>
-                    <option value="36">36 Ay</option>
-                  </select>
-                </div>
-                <br>
-              </div>
-              <div class="modal-footer">
-                <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
-                <button type="submit" class="btn btn-primary" name="eq_save" id="eq_save">Kaydet</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div><!-- addEquipment end-->
 
     </div> <!--container end-->
+
     <footer class="bg-white sticky-footer">
         <div class="container my-auto">
           <div class="text-center my-auto copyright"><span>Copyright © ÖzgürOSGB 2020</span></div>
         </div>
       </footer>
-  </div>
+
   <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
   <script src="../../assets/js/jquery.min.js"></script>
   <script src="../../assets/bootstrap/js/bootstrap.min.js"></script>
@@ -2020,6 +1616,11 @@ if (isset($_POST['sil'])) {
   <script src="../../assets/js/bs-init.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
   <script src="../../assets/js/theme.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'></script>
+  <script src='../../calendar/js/moment.min.js'></script>
+  <script src="https://code.jquery.com/jquery-1.9.1.min.js" integrity="sha256-wS9gmOZBqsqWxgIVgA8Y9WcQOa7PgSIX+rPA0VL2rbQ=" crossorigin="anonymous"></script>
+  <script src='../../calendar/js/fullcalendar.min.js'></script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js'></script>
   <?php
     if ($giriş_auth != 0 && $giriş_auth != 1 && $giriş_auth != 2 && $giriş_auth != 3) {
    ?>
@@ -2036,300 +1637,142 @@ if (isset($_POST['sil'])) {
     <?php
     }
      ?>
-     <script>
-       function myFunction() {
-         // Declare variables
-         var input, filter, table, tr, td, i, txtValue;
-         input = document.getElementById("myInput");
-         filter = input.value.toUpperCase();
-         table = document.getElementById("dataTable");
-         tr = table.getElementsByTagName("tr");
+  <script>
+       $(function() {
+       $('#calendar').fullCalendar({
+        monthNames: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
+        monthNamesShort: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
+        dayNames: ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],
+        dayNamesShort: ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],
+        editable:true,
+        buttonText: {
+              today:    'Bugün',
+              month:    'Ay',
+              week:     'Hafta',
+              day:      'Gün',
+              list:     'Liste',
+              listMonth: 'Aylık Liste',
+              listYear: 'Yıllık Liste',
+              listWeek: 'Haftalık Liste',
+              listDay: 'Günlük Liste'
+       },
+        header: {
+          left: 'prev,next,today',
+          center: 'title',
+          right: 'month,agendaWeek,agendaDay,listWeek'
+        },
+        height: 590,
+        businessHours: {
+          dow: [ 1, 2, 3, 4, 5 ],
 
-         // Loop through all table rows, and hide those who don't match the search query
-         for (i = 0; i < tr.length; i++) {
-           td = tr[i].getElementsByTagName("td")[0];
-           if (td) {
-             txtValue = td.textContent || td.innerText;
-             if (txtValue.toUpperCase().indexOf(filter) > -1) {
-               tr[i].style.display = "";
-             } else {
-               tr[i].style.display = "none";
-             }
-           }
-         }
+          start: '8:00',
+          end: '17:00',
+        },
+        nowIndicator: true,
+        scrollTime: '08:00:00',
+        editable: true,
+        navLinks: true,
+        eventLimit: true, // allow "more" link when there are too many events
+        selectable: true,
+        selectHelper: true,
+        select: function(start, end) {
+
+          $('#ModalAdd #start').val(moment(start).format('YYYY-MM-DD HH:mm:ss'));
+          $('#ModalAdd #end').val(moment(end).format('YYYY-MM-DD HH:mm:ss'));
+          $('#ModalAdd').modal('show');
+        },
+        eventAfterRender: function(eventObj, $el) {
+          var request = new XMLHttpRequest();
+          request.open('GET', '', true);
+          request.onload = function () {
+            $el.popover({
+              title: eventObj.title,
+              content: eventObj.description,
+              trigger: 'hover',
+              placement: 'top',
+              container: 'body'
+            });
+          }
+        request.send();
+        },
+
+        eventRender: function(event, element) {
+          element.bind('click', function() {
+            $('#ModalEdit #id').val(event.id);
+            $('#ModalEdit #title').val(event.title);
+            $('#ModalEdit #description').val(event.description);
+            $('#ModalEdit #color').val(event.color);
+            $('#ModalEdit').modal('show');
+          });
+        },
+        eventDrop: function(event, delta, revertFunc) { // si changement de position
+
+          edit(event);
+
+        },
+        eventResize: function(event,dayDelta,minuteDelta,revertFunc) { // si changement de longueur
+
+          edit(event);
+
+        },
+        events: [
+        <?php foreach ($events as $event):
+
+          $start = explode(" ", $event['start']);
+          $end = explode(" ", $event['end']);
+          if ($start[1] == '00:00:00') {
+              $start = $start[0];
+          } else {
+              $start = $event['start'];
+          }
+          if ($end[1] == '00:00:00') {
+              $end = $end[0];
+          } else {
+              $end = $event['end'];
+          }
+        ?>
+          {
+            id: '<?php echo $event['id']; ?>',
+            title: '<?php echo $event['title']; ?>',
+            description: '<?php echo $event['description']; ?>',
+            start: '<?php echo $start; ?>',
+            end: '<?php echo $end; ?>',
+            color: '<?php echo $event['color']; ?>',
+          },
+        <?php endforeach; ?>
+        ]
+       });
+
+       function edit(event){
+        start = event.start.format('YYYY-MM-DD HH:mm:ss');
+        if(event.end){
+          end = event.end.format('YYYY-MM-DD HH:mm:ss');
+        }else{
+          end = start;
+        }
+
+        id =  event.id;
+
+        Event = [];
+        Event[0] = id;
+        Event[1] = start;
+        Event[2] = end;
+
+        $.ajax({
+         url: '../../calendar/core/edit-date.php',
+         type: "POST",
+         data: {Event:Event},
+         success: function(rep) {
+            if(rep == 'OK'){
+              alert('Kaydedildi');
+            }else{
+              alert('Kaydedilemedi. Tekrar Deneyin!');
+            }
+          }
+        });
        }
 
-     </script>
-  <script>
-    $( "ic_form1" ).click(function( event ) {
-      event.preventDefault();
-    });
+     });
   </script>
-  <script type="text/javascript">
-    var citiesByState = {
-      Adana: ["Aladağ", "Ceyhan", "Çukurova", "Feke", "İmamoğlu", "Karaisalı", "Karataş", "Kozan", "Pozantı", "Saimbeyli", "Sarıçam", "Seyhan", "Tufanbeyli", "Yumurtalık", "Yüreğir"],
-      Adıyaman: ["Besni", "Çelikhan", "Gerger", "Gölbaşı", "Kahta", "Merkez", "Samsat", "Sincik", "Tut"],
-      Afyonkarahisar: ["Başmakçı", "Bayat", "Bolvadin", "Çay", "Çobanlar", "Dazkırı", "Dinar", "Emirdağ", "Evciler", "Hocalar", "İhsaniye", "İscehisar", "Kızılören", "Merkez", "Sandıklı", "Sinanpaşa", "Sultandağı", "Şuhut"],
-      Ağrı: ["Diyadin", "Doğubayazıt", "Eleşkirt", "Hamur", "Merkez", "Patnos", "Taşlıçay", "Tutak"],
-      Amasya: ["Göynücek", "Gümüşhacıköy", "Hamamözü", "Merkez", "Merzifon", "Suluova", "Taşova"],
-      Ankara: ["Altındağ", "Ayaş", "Bala", "Beypazarı", "Çamlıdere", "Çankaya", "Çubuk", "Elmadağ", "Güdül", "Haymana", "Kalecik", "Kızılcahamam", "Nallıhan", "Polatlı", "Şereflikoçhisar", "Yenimahalle", "Gölbaşı", "Keçiören", "Mamak", "Sincan",
-        "Kazan", "Akyurt", "Etimesgut", "Evren", "Pursaklar"
-      ],
-      Antalya: ["Akseki", "Alanya", "Elmalı", "Finike", "Gazipaşa", "Gündoğmuş", "Kaş", "Korkuteli", "Kumluca", "Manavgat", "Serik", "Demre", "İbradı", "Kemer", "Aksu", "Döşemealtı", "Kepez", "Konyaaltı", "Muratpaşa"],
-      Artvin: ["Ardanuç", "Arhavi", "Merkez", "Borçka", "Hopa", "Şavşat", "Yusufeli", "Murgul"],
-      Aydın: ["Merkez", "Bozdoğan", "Efeler", "Çine", "Germencik", "Karacasu", "Koçarlı", "Kuşadası", "Kuyucak", "Nazilli", "Söke", "Sultanhisar", "Yenipazar", "Buharkent", "İncirliova", "Karpuzlu", "Köşk", "Didim"],
-      Balıkesir: ["Altıeylül", "Ayvalık", "Merkez", "Balya", "Bandırma", "Bigadiç", "Burhaniye", "Dursunbey", "Edremit", "Erdek", "Gönen", "Havran", "İvrindi", "Karesi", "Kepsut", "Manyas", "Savaştepe", "Sındırgı", "Gömeç", "Susurluk", "Marmara"],
-      Bilecik: ["Merkez", "Bozüyük", "Gölpazarı", "Osmaneli", "Pazaryeri", "Söğüt", "Yenipazar", "İnhisar"],
-      Bingöl: ["Merkez", "Genç", "Karlıova", "Kiğı", "Solhan", "Adaklı", "Yayladere", "Yedisu"],
-      Bitlis: ["Adilcevaz", "Ahlat", "Merkez", "Hizan", "Mutki", "Tatvan", "Güroymak"],
-      Bolu: ["Merkez", "Gerede", "Göynük", "Kıbrıscık", "Mengen", "Mudurnu", "Seben", "Dörtdivan", "Yeniçağa"],
-      Burdur: ["Ağlasun", "Bucak", "Merkez", "Gölhisar", "Tefenni", "Yeşilova", "Karamanlı", "Kemer", "Altınyayla", "Çavdır", "Çeltikçi"],
-      Bursa: ["Gemlik", "İnegöl", "İznik", "Karacabey", "Keles", "Mudanya", "Mustafakemalpaşa", "Orhaneli", "Orhangazi", "Yenişehir", "Büyükorhan", "Harmancık", "Nilüfer", "Osmangazi", "Yıldırım", "Gürsu", "Kestel"],
-      Çanakkale: ["Ayvacık", "Bayramiç", "Biga", "Bozcaada", "Çan", "Merkez", "Eceabat", "Ezine", "Gelibolu", "Gökçeada", "Lapseki", "Yenice"],
-      Çankırı: ["Merkez", "Çerkeş", "Eldivan", "Ilgaz", "Kurşunlu", "Orta", "Şabanözü", "Yapraklı", "Atkaracalar", "Kızılırmak", "Bayramören", "Korgun"],
-      Çorum: ["Alaca", "Bayat", "Merkez", "İskilip", "Kargı", "Mecitözü", "Ortaköy", "Osmancık", "Sungurlu", "Boğazkale", "Uğurludağ", "Dodurga", "Laçin", "Oğuzlar"],
-      Denizli: ["Acıpayam", "Buldan", "Çal", "Çameli", "Çardak", "Çivril", "Merkez", "Merkezefendi", "Pamukkale", "Güney", "Kale", "Sarayköy", "Tavas", "Babadağ", "Bekilli", "Honaz", "Serinhisar", "Baklan", "Beyağaç", "Bozkurt"],
-      Diyarbakır: ["Kocaköy", "Çermik", "Çınar", "Çüngüş", "Dicle", "Ergani", "Hani", "Hazro", "Kulp", "Lice", "Silvan", "Eğil", "Bağlar", "Kayapınar", "Sur", "Yenişehir", "Bismil"],
-      Edirne: ["Merkez", "Enez", "Havsa", "İpsala", "Keşan", "Lalapaşa", "Meriç", "Uzunköprü", "Süloğlu"],
-      Elazığ: ["Ağın", "Baskil", "Merkez", "Karakoçan", "Keban", "Maden", "Palu", "Sivrice", "Arıcak", "Kovancılar", "Alacakaya"],
-      Erzincan: ["Çayırlı", "Merkez", "İliç", "Kemah", "Kemaliye", "Refahiye", "Tercan", "Üzümlü", "Otlukbeli"],
-      Erzurum: ["Aşkale", "Çat", "Hınıs", "Horasan", "İspir", "Karayazı", "Narman", "Oltu", "Olur", "Pasinler", "Şenkaya", "Tekman", "Tortum", "Karaçoban", "Uzundere", "Pazaryolu", "Köprüköy", "Palandöken", "Yakutiye", "Aziziye"],
-      Eskişehir: ["Çifteler", "Mahmudiye", "Mihalıççık", "Sarıcakaya", "Seyitgazi", "Sivrihisar", "Alpu", "Beylikova", "İnönü", "Günyüzü", "Han", "Mihalgazi", "Odunpazarı", "Tepebaşı"],
-      Gaziantep: ["Araban", "İslahiye", "Nizip", "Oğuzeli", "Yavuzeli", "Şahinbey", "Şehitkamil", "Karkamış", "Nurdağı"],
-      Giresun: ["Alucra", "Bulancak", "Dereli", "Espiye", "Eynesil", "Merkez", "Görele", "Keşap", "Şebinkarahisar", "Tirebolu", "Piraziz", "Yağlıdere", "Çamoluk", "Çanakçı", "Doğankent", "Güce"],
-      Gümüşhane: ["Merkez", "Kelkit", "Şiran", "Torul", "Köse", "Kürtün"],
-      Hakkari: ["Çukurca", "Merkez", "Şemdinli", "Yüksekova"],
-      Hatay: ["Altınözü", "Arsuz", "Defne", "Dörtyol", "Hassa", "Antakya", "İskenderun", "Kırıkhan", "Payas", "Reyhanlı", "Samandağ", "Yayladağı", "Erzin", "Belen", "Kumlu"],
-      Isparta: ["Atabey", "Eğirdir", "Gelendost", "Merkez", "Keçiborlu", "Senirkent", "Sütçüler", "Şarkikaraağaç", "Uluborlu", "Yalvaç", "Aksu", "Gönen", "Yenişarbademli"],
-      Mersin: ["Anamur", "Erdemli", "Gülnar", "Mut", "Silifke", "Tarsus", "Aydıncık", "Bozyazı", "Çamlıyayla", "Akdeniz", "Mezitli", "Toroslar", "Yenişehir"],
-      İstanbul: ["Adalar", "Bakırköy", "Beşiktaş", "Beykoz", "Beyoğlu", "Çatalca", "Eyüp", "Fatih", "Gaziosmanpaşa", "Kadıköy", "Kartal", "Sarıyer", "Silivri", "Şile", "Şişli", "Üsküdar", "Zeytinburnu", "Büyükçekmece", "Kağıthane", "Küçükçekmece",
-        "Pendik", "Ümraniye", "Bayrampaşa", "Avcılar", "Bağcılar", "Bahçelievler", "Güngören", "Maltepe", "Sultanbeyli", "Tuzla", "Esenler", "Arnavutköy", "Ataşehir", "Başakşehir", "Beylikdüzü", "Çekmeköy", "Esenyurt", "Sancaktepe", "Sultangazi"
-      ],
-      İzmir: ["Aliağa", "Bayındır", "Bergama", "Bornova", "Çeşme", "Dikili", "Foça", "Karaburun", "Karşıyaka", "Kemalpaşa", "Kınık", "Kiraz", "Menemen", "Ödemiş", "Seferihisar", "Selçuk", "Tire", "Torbalı", "Urla", "Beydağ", "Buca", "Konak",
-        "Menderes", "Balçova", "Çiğli", "Gaziemir", "Narlıdere", "Güzelbahçe", "Bayraklı", "Karabağlar"
-      ],
-      Kars: ["Arpaçay", "Digor", "Kağızman", "Merkez", "Sarıkamış", "Selim", "Susuz", "Akyaka"],
-      Kastamonu: ["Abana", "Araç", "Azdavay", "Bozkurt", "Cide", "Çatalzeytin", "Daday", "Devrekani", "İnebolu", "Merkez", "Küre", "Taşköprü", "Tosya", "İhsangazi", "Pınarbaşı", "Şenpazar", "Ağlı", "Doğanyurt", "Hanönü", "Seydiler"],
-      Kayseri: ["Bünyan", "Develi", "Felahiye", "İncesu", "Pınarbaşı", "Sarıoğlan", "Sarız", "Tomarza", "Yahyalı", "Yeşilhisar", "Akkışla", "Talas", "Kocasinan", "Melikgazi", "Hacılar", "Özvatan"],
-      Kırklareli: ["Babaeski", "Demirköy", "Merkez", "Kofçaz", "Lüleburgaz", "Pehlivanköy", "Pınarhisar", "Vize"],
-      Kırşehir: ["Çiçekdağı", "Kaman", "Merkez", "Mucur", "Akpınar", "Akçakent", "Boztepe"],
-      Kocaeli: ["Gebze", "Gölcük", "Kandıra", "Karamürsel", "Körfez", "Derince", "Başiskele", "Çayırova", "Darıca", "Dilovası", "İzmit", "Kartepe"],
-      Konya: ["Akşehir", "Beyşehir", "Bozkır", "Cihanbeyli", "Çumra", "Doğanhisar", "Ereğli", "Hadim", "Ilgın", "Kadınhanı", "Karapınar", "Kulu", "Sarayönü", "Seydişehir", "Yunak", "Akören", "Altınekin", "Derebucak", "Hüyük", "Karatay", "Meram",
-        "Selçuklu", "Taşkent", "Ahırlı", "Çeltik", "Derbent", "Emirgazi", "Güneysınır", "Halkapınar", "Tuzlukçu", "Yalıhüyük"
-      ],
-      Kütahya: ["Altıntaş", "Domaniç", "Emet", "Gediz", "Merkez", "Simav", "Tavşanlı", "Aslanapa", "Dumlupınar", "Hisarcık", "Şaphane", "Çavdarhisar", "Pazarlar"],
-      Malatya: ["Akçadağ", "Arapgir", "Arguvan", "Darende", "Doğanşehir", "Hekimhan", "Merkez", "Pütürge", "Yeşilyurt", "Battalgazi", "Doğanyol", "Kale", "Kuluncak", "Yazıhan"],
-      Manisa: ["Akhisar", "Alaşehir", "Demirci", "Gördes", "Kırkağaç", "Kula", "Merkez", "Salihli", "Sarıgöl", "Saruhanlı", "Selendi", "Soma", "Şehzadeler", "Yunusemre", "Turgutlu", "Ahmetli", "Gölmarmara", "Köprübaşı"],
-      Kahramanmaraş: ["Afşin", "Andırın", "Dulkadiroğlu", "Onikişubat", "Elbistan", "Göksun", "Merkez", "Pazarcık", "Türkoğlu", "Çağlayancerit", "Ekinözü", "Nurhak"],
-      Mardin: ["Derik", "Kızıltepe", "Artuklu", "Merkez", "Mazıdağı", "Midyat", "Nusaybin", "Ömerli", "Savur", "Dargeçit", "Yeşilli"],
-      Muğla: ["Bodrum", "Datça", "Fethiye", "Köyceğiz", "Marmaris", "Menteşe", "Milas", "Ula", "Yatağan", "Dalaman", "Seydikemer", "Ortaca", "Kavaklıdere"],
-      Muş: ["Bulanık", "Malazgirt", "Merkez", "Varto", "Hasköy", "Korkut"],
-      Nevşehir: ["Avanos", "Derinkuyu", "Gülşehir", "Hacıbektaş", "Kozaklı", "Merkez", "Ürgüp", "Acıgöl"],
-      Niğde: ["Bor", "Çamardı", "Merkez", "Ulukışla", "Altunhisar", "Çiftlik"],
-      Ordu: ["Akkuş", "Altınordu", "Aybastı", "Fatsa", "Gölköy", "Korgan", "Kumru", "Mesudiye", "Perşembe", "Ulubey", "Ünye", "Gülyalı", "Gürgentepe", "Çamaş", "Çatalpınar", "Çaybaşı", "İkizce", "Kabadüz", "Kabataş"],
-      Rize: ["Ardeşen", "Çamlıhemşin", "Çayeli", "Fındıklı", "İkizdere", "Kalkandere", "Pazar", "Merkez", "Güneysu", "Derepazarı", "Hemşin", "İyidere"],
-      Sakarya: ["Akyazı", "Geyve", "Hendek", "Karasu", "Kaynarca", "Sapanca", "Kocaali", "Pamukova", "Taraklı", "Ferizli", "Karapürçek", "Söğütlü", "Adapazarı", "Arifiye", "Erenler", "Serdivan"],
-      Samsun: ["Alaçam", "Bafra", "Çarşamba", "Havza", "Kavak", "Ladik", "Terme", "Vezirköprü", "Asarcık", "Ondokuzmayıs", "Salıpazarı", "Tekkeköy", "Ayvacık", "Yakakent", "Atakum", "Canik", "İlkadım"],
-      Siirt: ["Baykan", "Eruh", "Kurtalan", "Pervari", "Merkez", "Şirvan", "Tillo"],
-      Sinop: ["Ayancık", "Boyabat", "Durağan", "Erfelek", "Gerze", "Merkez", "Türkeli", "Dikmen", "Saraydüzü"],
-      Sivas: ["Divriği", "Gemerek", "Gürün", "Hafik", "İmranlı", "Kangal", "Koyulhisar", "Merkez", "Suşehri", "Şarkışla", "Yıldızeli", "Zara", "Akıncılar", "Altınyayla", "Doğanşar", "Gölova", "Ulaş"],
-      Tekirdağ: ["Çerkezköy", "Çorlu", "Ergene", "Hayrabolu", "Malkara", "Muratlı", "Saray", "Süleymanpaşa", "Kapaklı", "Şarköy", "Marmaraereğlisi"],
-      Tokat: ["Almus", "Artova", "Erbaa", "Niksar", "Reşadiye", "Merkez", "Turhal", "Zile", "Pazar", "Yeşilyurt", "Başçiftlik", "Sulusaray"],
-      Trabzon: ["Akçaabat", "Araklı", "Arsin", "Çaykara", "Maçka", "Of", "Ortahisar", "Sürmene", "Tonya", "Vakfıkebir", "Yomra", "Beşikdüzü", "Şalpazarı", "Çarşıbaşı", "Dernekpazarı", "Düzköy", "Hayrat", "Köprübaşı"],
-      Tunceli: ["Çemişgezek", "Hozat", "Mazgirt", "Nazımiye", "Ovacık", "Pertek", "Pülümür", "Merkez"],
-      Şanlıurfa: ["Akçakale", "Birecik", "Bozova", "Ceylanpınar", "Eyyübiye", "Halfeti", "Haliliye", "Hilvan", "Karaköprü", "Siverek", "Suruç", "Viranşehir", "Harran"],
-      Uşak: ["Banaz", "Eşme", "Karahallı", "Sivaslı", "Ulubey", "Merkez"],
-      Van: ["Başkale", "Çatak", "Erciş", "Gevaş", "Gürpınar", "İpekyolu", "Muradiye", "Özalp", "Tuşba", "Bahçesaray", "Çaldıran", "Edremit", "Saray"],
-      Yozgat: ["Akdağmadeni", "Boğazlıyan", "Çayıralan", "Çekerek", "Sarıkaya", "Sorgun", "Şefaatli", "Yerköy", "Merkez", "Aydıncık", "Çandır", "Kadışehri", "Saraykent", "Yenifakılı"],
-      Zonguldak: ["Çaycuma", "Devrek", "Ereğli", "Merkez", "Alaplı", "Gökçebey"],
-      Aksaray: ["Ağaçören", "Eskil", "Gülağaç", "Güzelyurt", "Merkez", "Ortaköy", "Sarıyahşi"],
-      Bayburt: ["Merkez", "Aydıntepe", "Demirözü"],
-      Karaman: ["Ermenek", "Merkez", "Ayrancı", "Kazımkarabekir", "Başyayla", "Sarıveliler"],
-      Kırıkkale: ["Delice", "Keskin", "Merkez", "Sulakyurt", "Bahşili", "Balışeyh", "Çelebi", "Karakeçili", "Yahşihan"],
-      Batman: ["Merkez", "Beşiri", "Gercüş", "Kozluk", "Sason", "Hasankeyf"],
-      Şırnak: ["Beytüşşebap", "Cizre", "İdil", "Silopi", "Merkez", "Uludere", "Güçlükonak"],
-      Bartın: ["Merkez", "Kurucaşile", "Ulus", "Amasra"],
-      Ardahan: ["Merkez", "Çıldır", "Göle", "Hanak", "Posof", "Damal"],
-      Iğdır: ["Aralık", "Merkez", "Tuzluca", "Karakoyunlu"],
-      Yalova: ["Merkez", "Altınova", "Armutlu", "Çınarcık", "Çiftlikköy", "Termal"],
-      Karabük: ["Eflani", "Eskipazar", "Merkez", "Ovacık", "Safranbolu", "Yenice"],
-      Kilis: ["Merkez", "Elbeyli", "Musabeyli", "Polateli"],
-      Osmaniye: ["Bahçe", "Kadirli", "Merkez", "Düziçi", "Hasanbeyli", "Sumbas", "Toprakkale"],
-      Düzce: ["Akçakoca", "Merkez", "Yığılca", "Cumayeri", "Gölyaka", "Çilimli", "Gümüşova", "Kaynaşlı"]
-    }
-
-    function makeSubmenu(value) {
-      if (value.length == 0) document.getElementById("citySelect").innerHTML = "<option></option>";
-      else {
-        var citiesOptions = "";
-        for (cityId in citiesByState[value]) {
-          citiesOptions += "<option>" + citiesByState[value][cityId] + "</option>";
-        }
-        document.getElementById("citySelect").innerHTML = citiesOptions;
-      }
-    }
-
-    function displaySelected() {
-      var country = document.getElementById("countrySelect").value;
-      var city = document.getElementById("citySelect").value;
-      alert(country + "\n" + city);
-    }
-
-    function resetSelection() {
-      document.getElementById("countrySelect").selectedIndex = 0;
-      document.getElementById("citySelect").selectedIndex = 0;
-    }
-  </script>
-  <script type="text/javascript">
-    if (window.history.replaceState) {
-      window.history.replaceState(null, null, window.location.href);
-    }
-  </script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'></script>
-  <script src='../../calendar/js/moment.min.js'></script>
-  <script
-    src="https://code.jquery.com/jquery-1.9.1.min.js"
-    integrity="sha256-wS9gmOZBqsqWxgIVgA8Y9WcQOa7PgSIX+rPA0VL2rbQ="
-    crossorigin="anonymous">
-  </script>
-  <script src='../../calendar/js/fullcalendar.min.js'></script>
-  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js'></script>
-  <script>
-   $(function() {
-    $('#calendar').fullCalendar({
-      monthNames: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
-      monthNamesShort: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
-      dayNames: ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],
-      dayNamesShort: ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],
-      editable:true,
-      buttonText: {
-            today:    'Bugün',
-            month:    'Ay',
-            week:     'Hafta',
-            day:      'Gün',
-            list:     'Liste',
-            listMonth: 'Aylık Liste',
-            listYear: 'Yıllık Liste',
-            listWeek: 'Haftalık Liste',
-            listDay: 'Günlük Liste'
-    },
-      header: {
-        left: 'prev,next,today',
-        center: 'title',
-        right: 'month,agendaWeek,agendaDay,listWeek'
-      },
-      height: 590,
-      businessHours: {
-        dow: [ 1, 2, 3, 4, 5 ],
-
-        start: '8:00',
-        end: '17:00',
-      },
-      nowIndicator: true,
-      scrollTime: '08:00:00',
-      editable: true,
-      navLinks: true,
-      eventLimit: true, // allow "more" link when there are too many events
-      selectable: true,
-      selectHelper: true,
-      select: function(start, end) {
-
-        $('#ModalAdd #start').val(moment(start).format('YYYY-MM-DD HH:mm:ss'));
-        $('#ModalAdd #end').val(moment(end).format('YYYY-MM-DD HH:mm:ss'));
-        $('#ModalAdd').modal('show');
-      },
-      eventAfterRender: function(eventObj, $el) {
-        var request = new XMLHttpRequest();
-        request.open('GET', '', true);
-        request.onload = function () {
-          $el.popover({
-            title: eventObj.title,
-            content: eventObj.description,
-            trigger: 'hover',
-            placement: 'top',
-            container: 'body'
-          });
-        }
-      request.send();
-      },
-
-      eventRender: function(event, element) {
-        element.bind('click', function() {
-          $('#ModalEdit #id').val(event.id);
-          $('#ModalEdit #title').val(event.title);
-          $('#ModalEdit #description').val(event.description);
-          $('#ModalEdit #color').val(event.color);
-          $('#ModalEdit').modal('show');
-        });
-      },
-      eventDrop: function(event, delta, revertFunc) { // si changement de position
-
-        edit(event);
-
-      },
-      eventResize: function(event,dayDelta,minuteDelta,revertFunc) { // si changement de longueur
-
-        edit(event);
-
-      },
-      events: [
-      <?php foreach ($events as $event):
-
-        $start = explode(" ", $event['start']);
-        $end = explode(" ", $event['end']);
-        if ($start[1] == '00:00:00') {
-            $start = $start[0];
-        } else {
-            $start = $event['start'];
-        }
-        if ($end[1] == '00:00:00') {
-            $end = $end[0];
-        } else {
-            $end = $event['end'];
-        }
-      ?>
-        {
-          id: '<?php echo $event['id']; ?>',
-          title: '<?php echo $event['title']; ?>',
-          description: '<?php echo $event['description']; ?>',
-          start: '<?php echo $start; ?>',
-          end: '<?php echo $end; ?>',
-          color: '<?php echo $event['color']; ?>',
-        },
-      <?php endforeach; ?>
-      ]
-    });
-
-    function edit(event){
-      start = event.start.format('YYYY-MM-DD HH:mm:ss');
-      if(event.end){
-        end = event.end.format('YYYY-MM-DD HH:mm:ss');
-      }else{
-        end = start;
-      }
-
-      id =  event.id;
-
-      Event = [];
-      Event[0] = id;
-      Event[1] = start;
-      Event[2] = end;
-
-      $.ajax({
-       url: './core/edit-date.php',
-       type: "POST",
-       data: {Event:Event},
-       success: function(rep) {
-          if(rep == 'OK'){
-            alert('Kaydedildi');
-          }else{
-            alert('Kaydedilemedi. Tekrar Deneyin!');
-          }
-        }
-      });
-    }
-
-  });</script>
 </body>
-
 </html>

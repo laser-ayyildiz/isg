@@ -79,7 +79,6 @@ foreach ($girişler as $giriş) {
 </head>
 
 <body id="page-top">
-  <div>
     <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
       <img width="55" height="40" class="rounded-circle img-profile" src="assets/img/nav_brand.jpg" />
       <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
@@ -169,8 +168,11 @@ foreach ($girişler as $giriş) {
   </div>
   </nav>
         <div class="container-fluid">
-          <h3 class="text-dark mb-4">Silinen İşletmeler</h3>
-          <div class="card shadow">
+
+          <div class="card shadow-lg">
+            <div class="card-header bg-light">
+              <h1 class="text-dark mb-1" style="text-align: center;"><b>Silinen İşletmeler</b></h1>
+            </div>
             <div class="card-body">
               <div id="dataTable_filter">
 
@@ -198,7 +200,7 @@ foreach ($girişler as $giriş) {
                         foreach ($companies as $key=>$company) {
                             ?>
                     <tr>
-                      <td><a href="companies/<?= $company->name ?>/<?= $company->name ?>.php"><?= $company->name ?></a></td>
+                      <td><a href="companies/<?= $company->name ?>/index.php?tab=genel_bilgiler"><?= $company->name ?></a></td>
                       <td><?= $company->comp_type ?></td>
                       <td><?= $company->phone ?></td>
                       <td><?= $company->mail ?></td>
@@ -231,7 +233,7 @@ foreach ($girişler as $giriş) {
           <div class="text-center my-auto copyright"><span>Copyright © ÖzgürOSGB 2020</span></div>
         </div>
       </footer>
-    </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
   </div>
   <script>
     function myFunction() {

@@ -92,15 +92,35 @@ if (isset($_POST['onay'])) {
     $stmt = $pdo->prepare($sqlque);
     $result = $stmt->execute();
     if ($result) {
-        ?>
-<div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-  <strong>Değişiklikleriniz ONAYLANDI!</strong>
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-<?php
+
+    $sorgu=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `coop_companies`.`name` = '$name' AND `change` = 1");
+    $sorgu->execute();
+    $companies=$sorgu-> fetchAll(PDO::FETCH_OBJ);
+    foreach ($companies as $company) {
+      $changer = $company->changer;
     }
+    $sorgu=$pdo->prepare("SELECT * FROM `users` WHERE `username` = '$changer'");
+    $sorgu->execute();
+    $users=$sorgu-> fetchAll(PDO::FETCH_OBJ);
+    foreach ($users as $user) {
+      $user_id = $user->id;
+    }
+    $sql = "INSERT INTO `notifications`(`notif_text`, `user_id`)
+    VALUES('$company->name işletmesi üzerinde yaptığınız değişiklikler onaylandı', '$user_id')";
+    $stmt2 = $pdo->prepare($sql);
+    $result2 = $stmt2->execute();
+    if ($result2) {
+    ?>
+    <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
+      <strong>Değişiklikleriniz ONAYLANDI!</strong>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <?php
+  }
+}
+
 }
 ?>
 <!DOCTYPE html>
@@ -151,7 +171,6 @@ if (isset($_POST['onay'])) {
 </head>
 
 <body id="page-top">
-  <div>
     <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
       <img width="55" height="40" class="rounded-circle img-profile" src="assets/img/nav_brand.jpg" />
       <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
@@ -159,7 +178,7 @@ if (isset($_POST['onay'])) {
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span></button>
 
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav navbar-expand mr-auto">
         <li class="nav-item">
         <div class="dropdown no-arrow">
           <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -204,10 +223,13 @@ if (isset($_POST['onay'])) {
       <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
         <li class="nav-item dropdown no-arrow mx-1">
           <div class="nav-item dropdown no-arrow">
+            <?php
+              $bildirim_say = $pdo->query("SELECT COUNT(*) FROM `notifications` WHERE `user_id` = '$id' ORDER BY reg_date")->fetchColumn();
+                    ?>
           <a href="notifications.php" title="Bildirimler" class="nav-link"
-            data-bs-hover-animate="rubberBand"><span
-                class="badge badge-danger badge-counter">3+</span><i style="color: black;"
-                class="fas fa-bell fa-fw"></i></a>
+            data-bs-hover-animate="rubberBand">
+            <i style="color: black;" class="fas fa-bell fa-fw"></i>
+            <span class="badge badge-danger badge-counter"><?= $bildirim_say ?></span></a>
           </div>
         </li>
         <li class="nav-item dropdown no-arrow mx-1">
@@ -216,15 +238,9 @@ if (isset($_POST['onay'])) {
               data-bs-hover-animate="rubberBand">
               <i style="color: black;" class="fas fa-envelope fa-fw"></i>
               <?php
-                    $msg=$pdo->prepare("SELECT * FROM `message` WHERE `kime` = '$ume' ORDER BY tarih");
-                    $msg->execute();
-                    $messages=$msg-> fetchAll(PDO::FETCH_OBJ);
-                    $i = 0;
-                    foreach ($messages as $key=>$message) {
-                        $i++;
-                    }
+                $mesaj_say = $pdo->query("SELECT COUNT(*) FROM `message` WHERE `kime` = '$ume' ORDER BY tarih")->fetchColumn();
                       ?>
-              <span class="badge badge-danger badge-counter"><?=$i?></span></a>
+              <span class="badge badge-danger badge-counter"><?=$mesaj_say?></span></a>
           </div>
           <div class="shadow dropdown-list dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown"></div>
         </li>
@@ -238,11 +254,13 @@ if (isset($_POST['onay'])) {
         <div class="d-none d-sm-block topbar-divider"></div>
           <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
       </ul>
-  </div>
+    </div>
   </nav>
-        <div class="container-fluid">
-          <h3 class="text-dark mb-4">İşletmeler</h3>
-          <div class="card shadow">
+    <div class="container-fluid">
+          <div class="card shadow-lg">
+            <div class="card-header bg-light">
+              <h1 class="text-dark mb-1" style="text-align: center;"><b>Onay Bekleyen Değişiklikler</b></h1>
+            </div>
             <div class="card-body">
               <div class="form-group col-md-4">
                 <input type="text" class="form-control" id="myInput" onkeyup="myFunction()" placeholder="İşletme Adı ile ara...">
@@ -273,7 +291,7 @@ if (isset($_POST['onay'])) {
                           foreach ($companies as $key=>$company) {
                               $change = $company->change; ?>
                         <tr>
-                          <td><a href="companies/<?= $company->name ?>/<?= $company->name ?>.php"><?= $company->name ?></a></td>
+                          <td><a href="companies/<?= $company->name ?>/index.php?tab=genel_bilgiler"><?= $company->name ?></a></td>
                           <td><?= $company->comp_type ?></td>
                           <td><?= $company->phone ?></td>
                           <td><?= $company->mail ?></td>
@@ -293,7 +311,7 @@ if (isset($_POST['onay'])) {
                           <?php
                               } ?>
                           <div class="modal fade" id="a<?php echo $key; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
+                            <div class="modal-dialog modal-xl">
                               <div class="modal-content">
                                 <div class="modal-header">
                                   <?php if ($change == "0") {
@@ -342,8 +360,6 @@ if (isset($_POST['onay'])) {
                                     <p><b>Düzenlemeye gönderen kullanıcı:&emsp;</b> <?= $company->changer ?></p>
                                     <p><b>İsg Uzmanı</b>:&emsp;<?= $uzman_fn." ".$uzman_ln ?></p>
                                     <p><b>İş Yeri Hekimi</b>:&emsp;<?= $hekim_fn." ".$hekim_ln ?></p>
-                                    <p><b>Ziyaret Sıklığı:&emsp;</b> <?= $company->remi_freq ?> Ay</p>
-
                                     <?php
                               $eski_sorgu=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `change` = '1' AND `name` = '$company->name'");
                               $eski_sorgu->execute();
@@ -358,6 +374,12 @@ if (isset($_POST['onay'])) {
                                   $eski_contract_date = $eski->contract_date;
                                   $eski_uzman_id = $eski->uzman_id;
                                   $eski_hekim_id = $eski->hekim_id;
+                                  $eski_mersis_no = $eski->mersis_no;
+                                  $eski_sgk_sicil = $eski->sgk_sicil;
+                                  $eski_vergi_no = $eski->vergi_no;
+                                  $eski_vergi_dairesi = $eski->vergi_dairesi;
+                                  $eski_katip_is_yeri_id = $eski->katip_is_yeri_id;
+                                  $eski_katip_kurum_id = $eski->katip_kurum_id;
                                   $eski_remi_freq = $eski->remi_freq;
                               } ?>
 
@@ -409,8 +431,9 @@ if (isset($_POST['onay'])) {
                                     <br>
                                     <div class="row">
                                       <?php
-                                        if ($eski_town != $company->town) { ?>
+                                        if ($eski_city != $company->city) { ?>
                                       <div class="col-sm-4">
+                                        <br>
                                             <label for="eski_city"><strong>Eski Şehir</strong></label>
                                             <input class="form-control" type="text" name="eski_town" value="<?= $eski_town ?>" readonly>
                                             <br>
@@ -418,8 +441,9 @@ if (isset($_POST['onay'])) {
                                             <input class="form-control" style="border: 2px solid red;" type="text" placeholder="Şehir" name="city" value="<?= $company->city ?>" required>
                                       </div>
                                       <?php }
-                              if ($eski_town != $company->town) { ?>
+                                      if ($eski_town != $company->town) { ?>
                                           <div class="col-sm-4">
+                                            <br>
                                             <label for="eski_town"><strong>Eski İlçe</strong></label>
                                             <input class="form-control" type="text" placeholder="E-mail" name="eski_city" value="<?= $eski_city ?>" readonly>
                                             <br>
@@ -427,13 +451,94 @@ if (isset($_POST['onay'])) {
                                             <input class="form-control" style="border: 2px solid red;" type="text" placeholder="İlçe" name="town" value="<?= $company->town ?>" required>
                                           </div>
                                     <?php }
-                              if ($eski_contract_date != $company->contract_date) { ?>
+                                    if ($eski_contract_date != $company->contract_date) { ?>
                                       <div class="col-sm-4">
+                                        <br>
                                         <label for="eski_contract_date"><strong>Eski Anlaşma Tarihi</strong></label>
                                         <input class="form-control" type="date" name="eski_contract_date" value="<?= $eski_contract_date?>" readonly>
                                         <br>
                                         <label for="contract_date" style="color:red"><strong>Yeni Anlaşma Tarihi:&emsp;</strong></label>
                                         <input class="form-control" style="border: 2px solid red;" type="date" placeholder="Anlaşma Tarihi" name="contract_date" value="<?= $company->contract_date ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_address != $company->address) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_address"><strong>Eski Adres</strong></label>
+                                        <input class="form-control" type="text" name="eski_address" value="<?= $eski_address ?>" readonly>
+                                        <br>
+                                        <label for="address" style="color:red"><strong>Yeni Adres:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" placeholder="Adres" name="address" value="<?= $company->address ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_remi_freq != $company->remi_freq) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_remi_freq"><strong>Eski Ziyaret Sıklığı(Ay)</strong></label>
+                                        <input class="form-control" type="text" name="eski_remi_freq" value="<?= $eski_remi_freq ?>" readonly>
+                                        <br>
+                                        <label for="remi_freq" style="color:red"><strong>Yeni Ziyaret Sıklığı(Ay):&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" placeholder="Ziyaret Sıklığı" name="remi_freq" value="<?= $company->remi_freq ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_mersis_no != $company->mersis_no) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_mersis_no"><strong>Eski Mersis No</strong></label>
+                                        <input class="form-control" type="text" name="eski_mersis_no" value="<?= $eski_mersis_no ?>" readonly>
+                                        <br>
+                                        <label for="mersis_no" style="color:red"><strong>Yeni Mersis No:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" placeholder="Mersis No" name="mersis_no" value="<?= $company->mersis_no ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_sgk_sicil != $company->sgk_sicil) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_sgk_sicil"><strong>Eski SGK Sicil No</strong></label>
+                                        <input class="form-control" type="text" name="eski_contract_date" value="<?= $eski_sgk_sicil ?>" readonly>
+                                        <br>
+                                        <label for="sgk_sicil" style="color:red"><strong>Yeni SGK Sicil No:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" name="sgk_sicil" value="<?= $company->sgk_sicil ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_vergi_no != $company->vergi_no) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_vergi_no"><strong>Eski Vergi No</strong></label>
+                                        <input class="form-control" type="text" name="eski_vergi_no" value="<?= $eski_vergi_no ?>" readonly>
+                                        <br>
+                                        <label for="vergi_no" style="color:red"><strong>Yeni Vergi No:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" name="vergi_no" value="<?= $company->vergi_no ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_vergi_dairesi != $company->vergi_dairesi) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_vergi_dairesi"><strong>Eski Vergi Dairesi</strong></label>
+                                        <input class="form-control" type="text" name="eski_vergi_dairesi" value="<?= $eski_vergi_dairesi ?>" readonly>
+                                        <br>
+                                        <label for="vergi_dairesi" style="color:red"><strong>Yeni Vergi Dairesi:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" name="vergi_dairesi" value="<?= $company->vergi_dairesi ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_katip_is_yeri_id != $company->katip_is_yeri_id) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_katip_is_yeri_id"><strong>Eski Katip İş Yeri ID</strong></label>
+                                        <input class="form-control" type="text" name="eski_katip_is_yeri_id" value="<?= $eski_katip_is_yeri_id ?>" readonly>
+                                        <br>
+                                        <label for="katip_is_yeri_id" style="color:red"><strong>Yeni Katip İş Yeri ID:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" name="katip_is_yeri_id" value="<?= $company->katip_is_yeri_id ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_katip_kurum_id != $company->katip_kurum_id) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_katip_kurum_id"><strong>Eski Katip Kurum ID</strong></label>
+                                        <input class="form-control" type="text" name="eski_katip_kurum_id" value="<?= $eski_katip_kurum_id ?>" readonly>
+                                        <br>
+                                        <label for="katip_kurum_id" style="color:red"><strong>Yeni Katip Kurum ID:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" name="katip_kurum_id" value="<?= $company->katip_kurum_id ?>" required>
                                       </div>
                                     <?php } ?>
                                     </div>
@@ -481,12 +586,11 @@ if (isset($_POST['onay'])) {
             </div>
           </div>
         </div>
+    <footer class="bg-white sticky-footer">
+      <div class="container my-auto">
+        <div class="text-center my-auto copyright"><span>Copyright © ÖzgürOSGB 2020</span></div>
       </div>
-      <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-          <div class="text-center my-auto copyright"><span>Copyright © ÖzgürOSGB 2020</span></div>
-        </div>
-      </footer>
+    </footer>
     </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
   </div>
   <script>
@@ -509,15 +613,6 @@ if (isset($_POST['onay'])) {
             tr[i].style.display = "none";
           }
         }
-      }
-    }
-
-  </script>
-  <script type="text/javascript">
-    function get_valid() {
-      var retVal = confirm("İşletme değişiklikleri kaydedilmiştir");
-      if (retVal == true) {
-        return true;
       }
     }
 

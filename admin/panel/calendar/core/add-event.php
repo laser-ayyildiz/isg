@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once('../utils/auth.php');
 require_once('../utils/sanitize.php');
 
@@ -28,7 +29,18 @@ if (isset($_POST['title'])) {
 	 print_r($prepareQuery->errorInfo());
 	 die ('Error executing the query.');
 	}
-}
+	if ($company_id == 0) {
+		header('Location: ../index.php');
+	}
+	else {
+		$sql = "SELECT `name` FROM `coop_companies` WHERE `id` = '$company_id'";
+	  foreach ($auth->query($sql) as $row) {
+			$company_name = $row['name'];
+	 	}
+	  header("Location: ../../companies/$company_name/index.php?tab=isletme_takvim");
 
-header('Location: '.$_SERVER['HTTP_REFERER']);
+	}
+
+}
+ob_flush();
 ?>

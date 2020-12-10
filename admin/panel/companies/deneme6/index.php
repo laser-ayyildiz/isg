@@ -1,3 +1,5 @@
+<?php session_start();
+$isim = 'deneme6';
 require_once('../../calendar/utils/auth.php');
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
@@ -186,7 +188,7 @@ require '../core/scripts.html';
         <h1><b><?= mb_convert_case($isim, MB_CASE_TITLE, "UTF-8")?></b></h1>
         <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
           <li class="nav-item">
-            <a class="nav-link <?php echo $_GET['tab'] === 'genel_bilgiler' ? 'active' : ''; ?>" id="gb-tab" data-toggle="tab" href="#genel_bilgiler" role="tab" aria-controls="Genel Bilgiler" aria-selected="true"><b>Bilgiler</b></a>
+            <a class="nav-link <?php echo $_GET['tab'] === 'genel_bilgiler' ? 'active' : ''; ?>" id="gb-tab" data-toggle="tab" href="#genel_bilgiler" role="tab" aria-controls="Genel Bilgiler" aria-selected="true"><b>Genel Bilgiler</b></a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?php echo $_GET['tab'] === 'osgb_calisanlar' ? 'active' : ''; ?>" id="oc-tab" data-toggle="tab" href="#osgb_calisanlar" role="tab" aria-controls="OSGB Çalışanları" aria-selected="false"><b>OSGB Çalışanları</b></a>
@@ -195,23 +197,25 @@ require '../core/scripts.html';
             <a class="nav-link <?php echo $_GET['tab'] === 'devlet_bilgileri' ? 'active' : ''; ?>" id="db-tab" data-toggle="tab" href="#devlet_bilgileri" role="tab" aria-controls="Devlet Bilgileri" aria-selected="false"><b>Devlet Bilgileri</b></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_calisanlar' ? 'active' : ''; ?>" id="ic-tab" data-toggle="tab" href="#isletme_calisanlar" role="tab" aria-controls="İşletme Çalışanları" aria-selected="false"><b>Çalışanlar</b></a>
+            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_calisanlar' ? 'active' : ''; ?>" id="ic-tab" data-toggle="tab" href="#isletme_calisanlar" role="tab" aria-controls="İşletme Çalışanları" aria-selected="false"><b>İşletme
+                Çalışanları</b></a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_takvim' ? 'active' : ''; ?>" id="it-tab" data-toggle="tab" href="#isletme_takvim" role="tab" aria-controls="İşletme Takvimi" aria-selected="false"><b>Takvim</b></a>
+            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_takvim' ? 'active' : ''; ?>" id="it-tab" data-toggle="tab" href="#isletme_takvim" role="tab" aria-controls="İşletme Takvimi" aria-selected="false"><b>İşletme Takvimi</b></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_ekipman' ? 'active' : ''; ?>" id="ie-tab" data-toggle="tab" href="#isletme_ekipman" role="tab" aria-controls="İşletme Ekipmanları" aria-selected="false"><b>Ekipmanlar</b></a>
+            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_ekipman' ? 'active' : ''; ?>" id="ie-tab" data-toggle="tab" href="#isletme_ekipman" role="tab" aria-controls="İşletme Ekipmanları" aria-selected="false"><b>İşletme
+                Ekipmanları</b></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="ir-tab" data-toggle="tab" href="#isletme_rapor" role="tab" aria-controls="İşletme Raporları" aria-selected="false"><b>Raporlar</b></a>
+            <a class="nav-link <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="ir-tab" data-toggle="tab" href="#isletme_rapor" role="tab" aria-controls="İşletme Raporları" aria-selected="false"><b>İşletme Raporları</b></a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?php echo $_GET['tab'] === 'ziyaret_rapor' ? 'active' : ''; ?>" id="zr-tab" data-toggle="tab" href="#ziyaret_rapor" role="tab" aria-controls="Ziyaret Raporları" aria-selected="false"><b>Ziyaret Raporları</b></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <?php echo $_GET['tab'] === 'silinen_calisanlar' ? 'active' : ''; ?>" id="sc-tab" data-toggle="tab" href="#silinen_calisanlar" role="tab" aria-controls="Silinen Çalışanlar"><b>Arşiv</b></a>
+            <a class="nav-link <?php echo $_GET['tab'] === 'silinen_calisanlar' ? 'active' : ''; ?>" id="sc-tab" data-toggle="tab" href="#silinen_calisanlar" role="tab" aria-controls="Silinen Çalışanlar"><b>Silinen Çalışanlar</b></a>
           </li>
         </ul>
       </div>
@@ -225,6 +229,7 @@ require '../core/scripts.html';
         <div class="tab-content" id="myTabContent">
           <!--Genel Bilgiler -->
           <div class="tab-pane fade show <?php echo $_GET['tab'] === 'genel_bilgiler' ? 'active' : ''; ?>" id="genel_bilgiler" role="tabpanel" aria-labelledby="gb-tab">
+
             <fieldset id="gb_form">
               <button style="float:right;" class="btn btn-danger" data-toggle="modal" data-target="#changeCompany" data-whatever="@getbootstrap">İşletme Bilgilerini Değiştir / İşletmeyi Sil</button>
               <div class="form-row">
@@ -965,7 +970,7 @@ require '../core/scripts.html';
                       </div>
                     </div>
                   </div>
-                      <?php
+                  <?php
                               } ?>
                 </tbody>
                 <tfoot>
@@ -1036,42 +1041,7 @@ require '../core/scripts.html';
 
           <!--İşletme Raporları -->
           <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="isletme_rapor" role="tabpanel" aria-labelledby="ir-tab">
-            <button class="btn btn-primary" id="ir_form" data-toggle="modal" data-target="#addReport" data-whatever="@getbootstrap">Yeni Rapor Hazırla</button>
-            <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-              <table class="table table-striped table-bordered table-hover table-sm" id="dataTable">
-                <thead class="thead-dark">
-                  <tr>
-                    <th>Dosya Adı</th>
-                    <th>Dosya Tarihi</th>
-                    <th>İndir</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php
-                        foreach (new DirectoryIterator(__DIR__.'/isletme_raporlari') as $file) {
-                          if ($file->isFile()) {
-                            $name = $file->getFilename();
-                            $file_name = explode("_", $name);
-                            ?>
-                  <tr>
-                    <td><?= $file_name[0] ?></td>
-                    <td><?= $file_name[1] ?></td>
-                    <td><input class="btn btn-success btn-sm" style="width:80px" type="button" value="İndir" onclick="window.location.href='isletme_raporlari/<?=$file?>';" /></td>
-                  </tr>
-                  <?php
-                            }
-                          }
-                          ?>
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td><strong>Dosya Adı</strong></td>
-                    <td><strong>Dosya Tarihi</strong></td>
-                    <td><strong>İndir</strong></td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+            isletme_rapor
           </div>
 
           <!--Ziyaret Raporları -->
@@ -1527,7 +1497,7 @@ require '../core/scripts.html';
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <form action="../core/addReport.php" method="POST">
+            <form action="index.php" method="POST">
               <div class="modal-body">
                 <div class="row col-12">
                   <label for="new_report">
@@ -1566,14 +1536,13 @@ require '../core/scripts.html';
                 <br>
               </div>
               <div class="modal-footer">
-                <input type="number" name="company_id" id="company_id" value="<?= $company_id ?>" hidden>
-                <input type="text" name="company_name" value="<?= $isim ?>" hidden>
-                <button type="submit" name="addReport_sub" class="btn btn-primary">Hazırla</button>
+                <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                <button type="submit" class="btn btn-primary">Hazırla</button>
               </div>
             </form>
           </div>
         </div>
-      </div><!-- addReport end-->
+      </div><!-- addEquipment end-->
 
       <!-- İşletme bilgilerini değiştir-->
       <div class="modal fade" id="changeCompany" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -2341,7 +2310,24 @@ require '../core/scripts.html';
           </div>
         </form>
       </div>
+      <div class="modal fade" id="sure" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-light">
+              <h5 class="modal-title" id="exampleModalLabel"><b>Emin misiniz?</b></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+              <div class="modal-body">
 
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-primary" name="yes_sure" id="yes_sure">Onayla</button>
+              </div>
+          </div>
+        </div>
+      </div><!-- addEquipment end-->
     </div>
     <!--card end-->
   </div>
@@ -2366,11 +2352,14 @@ require '../core/scripts.html';
     }
     // -->
   </script>
+
+
   <script src="../../assets/js/jquery.min.js"></script>
   <script src="../../assets/bootstrap/js/bootstrap.min.js"></script>
   <script src="../../assets/js/chart.min.js"></script>
   <script src="../../assets/js/bs-init.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
   <script src="../../assets/js/theme.js"></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'></script>

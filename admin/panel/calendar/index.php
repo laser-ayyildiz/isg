@@ -110,96 +110,92 @@ $events = $req->fetchAll();
 </head>
 
 <body id="page-top">
-  <div>
-    <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
-      <img width="55" height="40" class="rounded-circle img-profile" src="../assets/img/nav_brand.jpg" />
-      <a class="navbar-brand" title="Anasayfa" style="color: black;" href="../index.php"><b>Özgür OSGB</b></a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span></button>
+  <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
+    <img width="55" height="40" class="rounded-circle img-profile" src="../assets/img/nav_brand.jpg" />
+    <a class="navbar-brand" title="Anasayfa" style="color: black;" href="../index.php"><b>Özgür OSGB</b></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span></button>
 
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-        <div class="dropdown no-arrow">
-          <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-building"></i><span>&nbsp;İşletmeler</span></a>
-              <div class="dropdown-content" aria-labelledby="dropdownMenu2">
-                <a class="dropdown-item" type="button" href="../companies.php"><i class="fas fa-stream"></i><span>&nbsp;İşletme Listesi</span></a>
-                <a class="dropdown-item" type="button" href="../deleted_companies.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen İşletmeler</span></a>
-                <?php
-                if($auth_ == 1){?>
-                <a class="dropdown-item" type="button" href="../change_validate.php"><i class="fas fa-exchange-alt"></i><span>&nbsp;Onay Bekleyenler</span></a>
-                <?php }?>
-              </div>
-        </div>
-        </li>
-        <li class="nav-item">
-          <a style="color: black;" class="nav-link btn-warning" href="../reports.php"><i
-              class="fas fa-folder"></i><span>&nbsp;Raporlar</span></a>
-        </li>
-        <li class="nav-item">
-            <a style="color: black;" class="nav-link btn-warning active" href="../calendar/index.php"><i class="fas fa-calendar-alt"></i><span>&nbsp;Takvim</span></a>
-          </li>
-        <?php
-            if ($auth_ == 1) {
-          ?>
-        <li class="nav-item"><a style="color: black;" class="nav-link btn-warning" href="../settings.php"><i
-              class="fas fa-wrench"></i><span>&nbsp;Ayarlar</span></a></li>
-        <li class="nav-item">
-        <div class="dropdown no-arrow">
-          <button style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
-              class="fas fa-users"></i><span>&nbsp;Çalışanlar</span></button>
-              <div class="dropdown-content" aria-labelledby="dropdownMenu2">
-                <a class="dropdown-item" type="button" href="../osgb_users.php"><i class="fas fa-stream"></i><span>&nbsp;Çalışan Listesi</span></a>
-                <a class="dropdown-item" type="button" href="../deleted_workers.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen Çalışanlar</span></a>
-                <a class="dropdown-item" type="button" href="../authentication.php"><i class="fas fa-user-edit"></i><span>&nbsp;Yetkilendir</span></a>
-              </div>
-        </div>
-        </li>
-        <?php
-            }
-          ?>
-      </ul>
-      <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
-        <li class="nav-item dropdown no-arrow mx-1">
-          <div class="nav-item dropdown no-arrow">
-          <a href="../notifications.php" title="Bildirimler" class="nav-link"
-            data-bs-hover-animate="rubberBand"><span
-                class="badge badge-danger badge-counter">3+</span><i style="color: black;"
-                class="fas fa-bell fa-fw"></i></a>
-          </div>
-        </li>
-        <li class="nav-item dropdown no-arrow mx-1">
-          <div class="nav-item dropdown no-arrow">
-            <a style="color: black;" title="Mesajlar" href="../messages.php" class="dropdown-toggle nav-link"
-              data-bs-hover-animate="rubberBand">
-              <i style="color: black;" class="fas fa-envelope fa-fw"></i>
+    <ul class="navbar-nav navbar-expand mr-auto">
+      <li class="nav-item">
+      <div class="dropdown no-arrow">
+        <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-building"></i><span>&nbsp;İşletmeler</span></a>
+            <div class="dropdown-content" aria-labelledby="dropdownMenu2">
+              <a class="dropdown-item" type="button" href="../companies.php"><i class="fas fa-stream"></i><span>&nbsp;İşletme Listesi</span></a>
+              <a class="dropdown-item" type="button" href="../deleted_companies.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen İşletmeler</span></a>
               <?php
-                    $msg=$pdo->prepare("SELECT * FROM `message` WHERE `kime` = '$ume' ORDER BY tarih");
-                    $msg->execute();
-                    $messages=$msg-> fetchAll(PDO::FETCH_OBJ);
-                    $i = 0;
-                    foreach ($messages as $key=>$message) {
-                        $i++;
-                    }
-                      ?>
-              <span class="badge badge-danger badge-counter"><?=$i?></span></a>
-          </div>
-          <div class="shadow dropdown-list dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown"></div>
+              if($auth == 1){?>
+              <a class="dropdown-item" type="button" href="../change_validate.php"><i class="fas fa-exchange-alt"></i><span>&nbsp;Onay Bekleyenler</span></a>
+              <?php }?>
+            </div>
+      </div>
+      </li>
+      <li class="nav-item">
+        <a style="color: black;" class="nav-link btn-warning" href="../reports.php"><i
+            class="fas fa-folder"></i><span>&nbsp;Raporlar</span></a>
+      </li>
+      <li class="nav-item">
+          <a style="color: black;" class="nav-link btn-warning" href="../calendar/index.php"><i class="fas fa-calendar-alt"></i><span>&nbsp;Takvim</span></a>
         </li>
-        <div class="d-none d-sm-block topbar-divider"></div>
-        <li class="nav-item">
-          <div class="nav-item">
-            <a href="../profile.php" class="nav-link" title="Profil">
-              <span style="color:black;" class="d-none d-lg-inline mr-2 text-600"><?=$fn?> <?=$ln?></span><img
-                class="rounded-circle img-profile" src="../assets/users/<?=$picture?>"></a>
-        </li>
-        <div class="d-none d-sm-block topbar-divider"></div>
-          <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="../logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
-      </ul>
-  </div>
+      <?php
+          if ($auth == 1) {
+        ?>
+      <li class="nav-item"><a style="color: black;" class="nav-link btn-warning" href="../settings.php"><i
+            class="fas fa-wrench"></i><span>&nbsp;Ayarlar</span></a></li>
+      <li class="nav-item">
+      <div class="dropdown no-arrow">
+        <button style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
+            class="fas fa-users"></i><span>&nbsp;Çalışanlar</span></button>
+            <div class="dropdown-content" aria-labelledby="dropdownMenu2">
+              <a class="dropdown-item" type="button" href="../osgb_users.php"><i class="fas fa-stream"></i><span>&nbsp;Çalışan Listesi</span></a>
+              <a class="dropdown-item" type="button" href="../deleted_workers.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen Çalışanlar</span></a>
+              <a class="dropdown-item" type="button" href="../authentication.php"><i class="fas fa-user-edit"></i><span>&nbsp;Yetkilendir</span></a>
+            </div>
+      </div>
+      </li>
+      <?php
+          }
+        ?>
+    </ul>
+    <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
+      <li class="nav-item dropdown no-arrow mx-1">
+        <div class="nav-item dropdown no-arrow">
+          <?php
+            $bildirim_say = $pdo->query("SELECT COUNT(*) FROM `notifications` WHERE `user_id` = '$id' ORDER BY reg_date")->fetchColumn();
+                  ?>
+        <a href="../notifications.php" title="Bildirimler" class="nav-link"
+          data-bs-hover-animate="rubberBand">
+          <i style="color: black;" class="fas fa-bell fa-fw"></i>
+          <span class="badge badge-danger badge-counter"><?= $bildirim_say ?></span></a>
+        </div>
+      </li>
+      <li class="nav-item dropdown no-arrow mx-1">
+        <div class="nav-item dropdown no-arrow">
+          <a style="color: black;" title="Mesajlar" href="../messages.php" class="dropdown-toggle nav-link"
+            data-bs-hover-animate="rubberBand">
+            <i style="color: black;" class="fas fa-envelope fa-fw"></i>
+            <?php
+              $mesaj_say = $pdo->query("SELECT COUNT(*) FROM `message` WHERE `kime` = '$ume' ORDER BY tarih")->fetchColumn();
+                    ?>
+            <span class="badge badge-danger badge-counter"><?=$mesaj_say?></span></a>
+        </div>
+        <div class="shadow dropdown-list dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown"></div>
+      </li>
+      <div class="d-none d-sm-block topbar-divider"></div>
+      <li class="nav-item">
+        <div class="nav-item">
+          <a href="../profile.php" class="nav-link" title="Profil">
+            <span style="color:black;" class="d-none d-lg-inline mr-2 text-600"><?=$fn?> <?=$ln?></span><img
+              class="rounded-circle img-profile" src="../assets/users/<?=$picture?>"></a>
+      </li>
+      <div class="d-none d-sm-block topbar-divider"></div>
+        <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="../logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
+        </div>
+    </ul>
   </nav>
-      <div class="card">
+    <div class="card shadow-lg">
         <div class="card-header border bg-light">
           <h1 class="text-dark" style="text-align: center; width:%100;"><b>Takvim</b></h1>
         </div>
@@ -343,8 +339,6 @@ $events = $req->fetchAll();
             <div class="text-center my-auto copyright"><span>Copyright © ÖzgürOSGB 2020</span></div>
         </div>
     </footer>
-
-  </div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'></script>
     <script src='js/moment.min.js'></script>
     <script

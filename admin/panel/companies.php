@@ -107,6 +107,7 @@ if (isset($_POST['kaydet'])) {
 <?php
             mkdir("companies/$name", 0777);
             mkdir("companies/$name/ziyaret_raporlari", 0777);
+            mkdir("companies/$name/isletme_raporlari", 0777);
             $dosya = "/exmple_comp.php";
             $dt = fopen(__DIR__.$dosya, "r");
             $içerik = fread($dt, 10000000);
@@ -227,10 +228,13 @@ $isim$is = '$name';
       <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
         <li class="nav-item dropdown no-arrow mx-1">
           <div class="nav-item dropdown no-arrow">
+            <?php
+              $bildirim_say = $pdo->query("SELECT COUNT(*) FROM `notifications` WHERE `user_id` = '$id' ORDER BY reg_date")->fetchColumn();
+                    ?>
           <a href="notifications.php" title="Bildirimler" class="nav-link"
-            data-bs-hover-animate="rubberBand"><span
-                class="badge badge-danger badge-counter">3+</span><i style="color: black;"
-                class="fas fa-bell fa-fw"></i></a>
+            data-bs-hover-animate="rubberBand">
+            <i style="color: black;" class="fas fa-bell fa-fw"></i>
+            <span class="badge badge-danger badge-counter"><?= $bildirim_say ?></span></a>
           </div>
         </li>
         <li class="nav-item dropdown no-arrow mx-1">
@@ -239,15 +243,9 @@ $isim$is = '$name';
               data-bs-hover-animate="rubberBand">
               <i style="color: black;" class="fas fa-envelope fa-fw"></i>
               <?php
-                    $msg=$pdo->prepare("SELECT * FROM `message` WHERE `kime` = '$ume' ORDER BY tarih");
-                    $msg->execute();
-                    $messages=$msg-> fetchAll(PDO::FETCH_OBJ);
-                    $i = 0;
-                    foreach ($messages as $key=>$message) {
-                        $i++;
-                    }
+                $mesaj_say = $pdo->query("SELECT COUNT(*) FROM `message` WHERE `kime` = '$ume' ORDER BY tarih")->fetchColumn();
                       ?>
-              <span class="badge badge-danger badge-counter"><?=$i?></span></a>
+              <span class="badge badge-danger badge-counter"><?=$mesaj_say?></span></a>
           </div>
           <div class="shadow dropdown-list dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown"></div>
         </li>
@@ -261,15 +259,15 @@ $isim$is = '$name';
         <div class="d-none d-sm-block topbar-divider"></div>
           <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
       </ul>
-  </div>
+    </div>
   </nav>
         <div class="container-fluid">
           <div class="card">
-            <div class="card-header border bg-light">
+            <div class="card-header bg-light">
               <h1 class="text-dark mb-1" style="text-align: center;"><b>İşletmeler</b></h1>
             </div>
-            <div class="card shadow">
-            <div class="card-body border bg-light text-light">
+            <div class="card shadow-lg">
+            <div class="card-body bg-light text-light">
                 <button class="btn btn-primary" data-toggle="modal" data-target="#addCompany" data-whatever="@getbootstrap">Yeni İşletme Ekle</a>
                 <?php
                 if ($auth == 1) {
@@ -318,7 +316,7 @@ $isim$is = '$name';
                         foreach ($companies as $key=>$company) {
                             ?>
                     <tr>
-                      <td><a href="companies/<?= $company->name ?>/index.php"><?= $company->name ?></a></td>
+                      <td><a href="companies/<?= $company->name ?>/index.php?tab=genel_bilgiler"><?= $company->name ?></a></td>
                       <td><?= $company->comp_type ?></td>
                       <td><?= $company->phone ?></td>
                       <td><?= $company->mail ?></td>
@@ -351,14 +349,14 @@ $isim$is = '$name';
             <div class="modal-dialog modal-xl" role="document">
               <div class="modal-content">
                 <div class="modal-c-tabs">
-                  <ul class="nav nav-tabs justify-content-center bg-warning" style="padding-top: 10px"role="tablist">
+                  <ul class="nav nav-tabs justify-content-center bg-light" style="padding-top: 10px"role="tablist">
                     <li class="nav-item">
                       <a class="nav-link active text-dark" id="link1-tab" data-toggle="tab" href="#link1" role="tab" aria-selected="true" aria-controls="link1">
                       <h5><b>İşletme Genel Bilgileri</b></h5></a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link text-dark" id="link2-tab" data-toggle="tab" role="tab" href="#link2" aria-selected="false" aria-controls="link2">
-                        <h5><b>Çalışan Ata</b></h5></a>
+                        <h5><b>OSGB Çalışanları</b></h5></a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link text-dark" id="link3-tab" data-toggle="tab" role="tab" href="#link3" aria-selected="false" aria-controls="link3">
@@ -891,7 +889,6 @@ $isim$is = '$name';
         </div>
       </footer>
     </div>
-    <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
   </div>
   <div name="scripts">
     <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>

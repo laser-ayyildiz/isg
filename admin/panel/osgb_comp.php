@@ -110,7 +110,6 @@ if (isset($_POST["btn-update"])) {
 </head>
 
 <body id="page-top">
-  <div>
     <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
       <img width="55" height="40" class="rounded-circle img-profile" src="assets/img/nav_brand.jpg" />
       <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
@@ -118,7 +117,7 @@ if (isset($_POST["btn-update"])) {
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span></button>
 
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav navbar-expand mr-auto">
         <li class="nav-item">
         <div class="dropdown no-arrow">
           <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -163,10 +162,13 @@ if (isset($_POST["btn-update"])) {
       <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
         <li class="nav-item dropdown no-arrow mx-1">
           <div class="nav-item dropdown no-arrow">
+            <?php
+              $bildirim_say = $pdo->query("SELECT COUNT(*) FROM `notifications` WHERE `user_id` = '$id' ORDER BY reg_date")->fetchColumn();
+                    ?>
           <a href="notifications.php" title="Bildirimler" class="nav-link"
-            data-bs-hover-animate="rubberBand"><span
-                class="badge badge-danger badge-counter">3+</span><i style="color: black;"
-                class="fas fa-bell fa-fw"></i></a>
+            data-bs-hover-animate="rubberBand">
+            <i style="color: black;" class="fas fa-bell fa-fw"></i>
+            <span class="badge badge-danger badge-counter"><?= $bildirim_say ?></span></a>
           </div>
         </li>
         <li class="nav-item dropdown no-arrow mx-1">
@@ -175,15 +177,9 @@ if (isset($_POST["btn-update"])) {
               data-bs-hover-animate="rubberBand">
               <i style="color: black;" class="fas fa-envelope fa-fw"></i>
               <?php
-                    $msg=$pdo->prepare("SELECT * FROM `message` WHERE `kime` = '$ume' ORDER BY tarih");
-                    $msg->execute();
-                    $messages=$msg-> fetchAll(PDO::FETCH_OBJ);
-                    $i = 0;
-                    foreach ($messages as $key=>$message) {
-                        $i++;
-                    }
+                $mesaj_say = $pdo->query("SELECT COUNT(*) FROM `message` WHERE `kime` = '$ume' ORDER BY tarih")->fetchColumn();
                       ?>
-              <span class="badge badge-danger badge-counter"><?=$i?></span></a>
+              <span class="badge badge-danger badge-counter"><?=$mesaj_say?></span></a>
           </div>
           <div class="shadow dropdown-list dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown"></div>
         </li>
@@ -196,10 +192,10 @@ if (isset($_POST["btn-update"])) {
         </li>
         <div class="d-none d-sm-block topbar-divider"></div>
           <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
+          </div>
       </ul>
-  </div>
-  </nav>
-    <div class="card">
+    </nav>
+    <div class="card shadow-lg">
       <div class="card-header" style="text-align:center;"><b><h1>İşletme Bilgileri</b></h1></div>
       <div class="card-body">
                 <?php

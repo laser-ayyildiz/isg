@@ -20,6 +20,43 @@ foreach ($girişler as $giriş) {
 if ($auth == 5 || $auth == 7) {
     header('Location: 403.php');
 }
+$bildirim_sil=$pdo->prepare("SELECT * FROM `notifications` WHERE `user_id` = '$id'");
+$bildirim_sil->execute();
+$notifications=$bildirim_sil-> fetchAll(PDO::FETCH_OBJ);
+$today = date("y-m-d");
+foreach ($notifications as $notification) {
+  $n_id = $notification->id;
+  $n_date = new DateTime($notification->reg_date);
+  $n_date->modify('+14 day');
+  if ($n_date->format('y-m-d') == $today) {
+    $sil=$pdo->prepare("DELETE FROM `notifications` WHERE `id` = '$n_id'");
+    $sil->execute();
+  }
+}
+$bildirim_ekle = $pdo->prepare("SELECT * FROM `events` WHERE `user_id` = '$id' AND `notif` = 0");
+$bildirim_ekle->execute();
+$events=$bildirim_ekle->fetchAll(PDO::FETCH_OBJ);
+foreach ($events as $event) {
+  $event_id = $event->id;
+  $event_title = $event->title;
+  $event_desc = $event->description;
+  $today = new DateTime(date('Y-m-d'));
+  $today->modify('+14 day');
+  $basla = new DateTime($event->start);
+  date_time_set($basla, 00, 00, 00);
+  if ($today == $basla) {
+    $ekle="INSERT INTO `notifications`(`user_id`,`notif_text`) VALUES('$id','Başlık: $event_title, Açıklama: $event_desc')";
+    $stmt = $pdo->prepare($ekle);
+    $result = $stmt->execute();
+    if ($result) {
+      $guncelle="UPDATE `events` SET `notif` = 1 WHERE `id` = '$event_id'";
+      $stmt2 = $pdo->prepare($guncelle);
+      $result2 = $stmt2->execute();
+      if ($result2) {}
+    }
+  }
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -72,8 +109,7 @@ if ($auth == 5 || $auth == 7) {
 </head>
 
 <body id="page-top">
-  <div>
-    <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
+  <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
       <img width="55" height="40" class="rounded-circle img-profile" src="assets/img/nav_brand.jpg" />
       <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -125,10 +161,13 @@ if ($auth == 5 || $auth == 7) {
       <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
         <li class="nav-item dropdown no-arrow mx-1">
           <div class="nav-item dropdown no-arrow">
+            <?php
+              $bildirim_say = $pdo->query("SELECT COUNT(*) FROM `notifications` WHERE `user_id` = '$id' ORDER BY reg_date")->fetchColumn();
+                    ?>
           <a href="notifications.php" title="Bildirimler" class="nav-link"
-            data-bs-hover-animate="rubberBand"><span
-                class="badge badge-danger badge-counter">3+</span><i style="color: black;"
-                class="fas fa-bell fa-fw"></i></a>
+            data-bs-hover-animate="rubberBand">
+            <i style="color: black;" class="fas fa-bell fa-fw"></i>
+            <span class="badge badge-danger badge-counter"><?= $bildirim_say ?></span></a>
           </div>
         </li>
         <li class="nav-item dropdown no-arrow mx-1">
@@ -146,22 +185,22 @@ if ($auth == 5 || $auth == 7) {
         <div class="d-none d-sm-block topbar-divider"></div>
         <li class="nav-item">
           <div class="nav-item">
-            <a href="profile.php" class="nav-link" title="Profil" data-bs-hover-animate="tada">
+            <a href="profile.php" class="nav-link" title="Profil">
               <span style="color:black;" class="d-none d-lg-inline mr-2 text-600"><?=$fn?> <?=$ln?></span><img
                 class="rounded-circle img-profile" src="assets/users/<?=$picture?>"></a>
         </li>
         <div class="d-none d-sm-block topbar-divider"></div>
-          <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="logout.php" data-bs-hover-animate="flip"><i class="fas fa-sign-out-alt" ></i><span>&nbsp;Çıkış</span></a></li>
+          <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
+          </div>
       </ul>
-  </div>
-  </nav>
+    </nav>
   <div class="container-fluid">
     <div class="d-sm-flex justify-content-between align-items-center mb-4">
       <h3 class="text-dark mb-0">Ana Sayfa</h3>
     </div>
     <div class="row">
       <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-left-primary py-2">
+        <div class="card shadow-lg border-left-primary py-2">
           <div class="card-body">
             <div class="row align-items-center no-gutters">
               <div class="col mr-2">
@@ -178,7 +217,7 @@ if ($auth == 5 || $auth == 7) {
         </div>
       </div>
       <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-left-success py-2">
+        <div class="card shadow-lg border-left-success py-2">
           <div class="card-body">
             <div class="row align-items-center no-gutters">
               <div class="col mr-2">
@@ -195,17 +234,17 @@ if ($auth == 5 || $auth == 7) {
         </div>
       </div>
       <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-left-info py-2">
+        <div class="card shadow-lg border-left-info py-2">
           <div class="card-body">
             <div class="row align-items-center no-gutters">
               <div class="col mr-2">
+                <?php
+                  $ekipman_say = $pdo->query('SELECT COUNT(*) FROM `equipment`')->fetchColumn();
+                ?>
                 <div class="text-uppercase text-info font-weight-bold text-xs mb-1"><span>Toplam Ekipman sayısı</span>
                 </div>
                 <div class="row no-gutters align-items-center">
                   <div class="col-auto">
-                    <?php
-                      $ekipman_say = $pdo->query('SELECT COUNT(*) FROM `equipment`')->fetchColumn();
-                    ?>
                     <div class="text-dark font-weight-bold h5 mb-0 mr-3"><span><?= $ekipman_say ?></span></div>
                   </div>
                 </div>
@@ -216,16 +255,16 @@ if ($auth == 5 || $auth == 7) {
         </div>
       </div>
       <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-left-warning py-2">
+        <div class="card shadow-lg border-left-warning py-2">
           <div class="card-body">
             <div class="row align-items-center no-gutters">
               <div class="col mr-2">
-                <?php
-                  $gorev_say = $pdo->query('SELECT COUNT(*) FROM `events`')->fetchColumn();
-                ?>
-                <div class="text-uppercase text-warning font-weight-bold text-xs mb-1"><span>Planlanmış Etkinlik
+                <div class="text-uppercase text-warning font-weight-bold text-xs mb-1"><span>Toplam Etkinlik
                     Sayısı</span></div>
-                <div class="text-dark font-weight-bold h5 mb-0"><span><?= $gorev_say ?></span></div>
+                    <?php
+                      $etkinlik_say = $pdo->query("SELECT COUNT(*) FROM `events` WHERE `user_id` = $id")->fetchColumn();
+                    ?>
+                <div class="text-dark font-weight-bold h5 mb-0"><span><?= $etkinlik_say ?></span></div>
               </div>
               <div class="col-auto"><i class="fas fa-pencil-alt fa-2x text-gray-300"></i></div>
             </div>
@@ -235,7 +274,7 @@ if ($auth == 5 || $auth == 7) {
     </div>
     <div class="row">
       <div class="col-lg-7 col-xl-8">
-        <div class="card shadow mb-4">
+        <div class="card shadow-lg mb-4">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="text-primary font-weight-bold m-0">Aylara göre anlaşılan işletme sayıları</h6>
           </div>
@@ -280,7 +319,7 @@ if ($auth == 5 || $auth == 7) {
         </div>
       </div>
       <div class="col-lg-5 col-xl-4">
-        <div class="card shadow mb-4">
+        <div class="card shadow-lg mb-4">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="text-primary font-weight-bold m-0"></h6>
             <h6 class="text-primary font-weight-bold m-0">Türlerine Göre işletmeler</h6>
@@ -323,36 +362,37 @@ if ($auth == 5 || $auth == 7) {
     </div>
     <div class="row">
       <div class="col-lg-6 mb-4">
-        <div class="card shadow mb-4">
+        <div class="card shadow-lg mb-4">
           <div class="card-header py-3">
             <h6 class="text-primary font-weight-bold m-0">Tehlikesine göre işletmeler</h6>
           </div>
           <div class="card-body">
             <?php
-              $az_tehlikeli = $pdo->query('SELECT COUNT(*) FROM `coop_companies` WHERE `danger_type` = 1')->fetchColumn();
-              $orta_tehlikeli = $pdo->query('SELECT COUNT(*) FROM `coop_companies` WHERE `danger_type` = 2')->fetchColumn();
-              $cok_tehlikeli = $pdo->query('SELECT COUNT(*) FROM `coop_companies` WHERE `danger_type` = 3')->fetchColumn();
-              $az_tehlikeli_say = $az_tehlikeli/$isletme_say*100;
-              $orta_tehlikeli_say = $orta_tehlikeli/$isletme_say*100;
-              $cok_tehlikeli_say = $cok_tehlikeli/$isletme_say*100;
+              $toplam = $pdo->query("SELECT COUNT(*) FROM `coop_companies` WHERE `change` = '1'")->fetchColumn();
+              $cok_tehlikeli = $pdo->query("SELECT COUNT(*) FROM `coop_companies` WHERE `danger_type` = 3")->fetchColumn();
+              $orta_tehlikeli = $pdo->query("SELECT COUNT(*) FROM `coop_companies` WHERE `danger_type` = 2")->fetchColumn();
+              $az_tehlikeli = $pdo->query("SELECT COUNT(*) FROM `coop_companies` WHERE `danger_type` = 1")->fetchColumn();
+              echo "$orta_tehlikeli_say";
+              $cok_tehlikeli_say = $cok_tehlikeli/$toplam*100;
+              $orta_tehlikeli_say = $orta_tehlikeli/$toplam*100;
+              $az_tehlikeli_say = $az_tehlikeli/$toplam*100;
             ?>
-
-              <h4 class="small font-weight-bold">Az Tehlikeli İşletmeler<span class="float-right"><?= $az_tehlikeli_say ?>%</span></h4>
-              <div class="progress mb-4">
-                <div class="progress-bar progress-bar-animated progress-bar-striped bg-success" aria-valuenow="<?= $az_tehlikeli_say ?>" aria-valuemin="0" aria-valuemax="100"
-                  style="width: <?= $az_tehlikeli_say ?>%;"><span class="sr-only"><?= $az_tehlikeli_say ?>%</span></div>
-              </div>
-              <h4 class="small font-weight-bold">Orta Tehlikeli İşletmeler<span class="float-right"><?= $orta_tehlikeli_say ?>%</span></h4>
-              <div class="progress mb-4">
-                <div class="progress-bar progress-bar-animated progress-bar-striped bg-warning" aria-valuenow="<?= $orta_tehlikeli_say ?>" aria-valuemin="0" aria-valuemax="100"
-                  style="width: <?= $orta_tehlikeli_say ?>%;"><span class="sr-only"><?= $orta_tehlikeli_say ?>%</span></div>
-              </div>
-              <h4 class="small font-weight-bold">Çok Tehlikeli İşletmeler<span class="float-right"></span><span
-                  class="float-right"><?= $cok_tehlikeli_say ?>%</span></h4>
-              <div class="progress mb-4">
-                <div class="progress-bar progress-bar-animated progress-bar-striped bg-danger" aria-valuenow="<?= $cok_tehlikeli_say ?>" aria-valuemin="0" aria-valuemax="100"
-                  style="width: <?= $cok_tehlikeli_say ?>%;"><span class="sr-only"><?= $cok_tehlikeli_say ?>%</span></div>
-              </div>
+            <h4 class="small font-weight-bold">Çok Tehlikeli<span class="float-right"><?= number_format((float)$cok_tehlikeli_say, 1, '.', ''); ?>%</span></h4>
+            <div class="progress mb-4">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" aria-valuenow="<?= $cok_tehlikeli_say ?>" aria-valuemin="0" aria-valuemax="100"
+                style="width: <?= $cok_tehlikeli_say ?>%;"><span class="sr-only"><?= $cok_tehlikeli_say ?>%</span></div>
+            </div>
+            <h4 class="small font-weight-bold">Orta Tehlikeli<span class="float-right"><?= number_format((float)$orta_tehlikeli_say, 1, '.', ''); ?>%</span></h4>
+            <div class="progress mb-4">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
+                style="width: <?= $orta_tehlikeli_say ?>%;"><span class="sr-only"><?= $orta_tehlikeli_say ?>%</span></div>
+            </div>
+            <h4 class="small font-weight-bold">AzTehlikeli<span class="float-right"></span><span
+                class="float-right"><?= number_format((float)$az_tehlikeli_say, 1, '.', ''); ?>%</span></h4>
+            <div class="progress mb-4">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" aria-valuenow="<?= $az_tehlikeli_say ?>" aria-valuemin="0" aria-valuemax="100"
+                style="width: <?= $az_tehlikeli_say ?>%;"><span class="sr-only"><?= $az_tehlikeli_say ?>%</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -385,7 +425,6 @@ if ($auth == 5 || $auth == 7) {
         </div>
       </div>
     </div>
-  </div>
   </div>
   <footer class="bg-white sticky-footer">
     <div class="container my-auto">

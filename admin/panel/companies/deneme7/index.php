@@ -1,3 +1,5 @@
+<?php session_start();
+$isim = 'deneme7';
 require_once('../../calendar/utils/auth.php');
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
@@ -1036,7 +1038,7 @@ require '../core/scripts.html';
 
           <!--İşletme Raporları -->
           <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="isletme_rapor" role="tabpanel" aria-labelledby="ir-tab">
-            <button class="btn btn-primary" id="ir_form" data-toggle="modal" data-target="#addReport" data-whatever="@getbootstrap">Yeni Rapor Hazırla</button>
+            <button class="btn btn-primary" id="ir_form" data-toggle="modal" data-target="#addReport" data-whatever="@getbootstrap">Yeni Ziyaret Raporu Ekle</button>
             <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
               <table class="table table-striped table-bordered table-hover table-sm" id="dataTable">
                 <thead class="thead-dark">

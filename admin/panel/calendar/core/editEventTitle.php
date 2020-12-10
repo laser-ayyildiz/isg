@@ -24,7 +24,7 @@ if (isset($_POST['delete']) && isset($_POST['id'])){
 		header('Location: ../index.php');
 	}
 	else {
-		header("Location: ../../companies/$company_name/index.php");
+		header("Location: ../../companies/$company_name/index.php?tab=isletme_takvim");
 
 	}
 
@@ -56,7 +56,7 @@ if (isset($_POST['delete']) && isset($_POST['id'])){
 		header('Location: ../index.php');
 	}
 	else {
-		header("Location: ../../companies/$company_name/index.php");
+		header("Location: ../../companies/$company_name/index.php?tab=isletme_takvim");
 
 	}
 }

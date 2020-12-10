@@ -1,3 +1,5 @@
+<?php session_start();
+$isim = 'deneme9';
 require_once('../../calendar/utils/auth.php');
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {

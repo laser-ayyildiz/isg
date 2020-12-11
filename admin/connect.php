@@ -1,6 +1,6 @@
 <?php
 define('MYSQL_USER', 'root');
-define('MYSQL_PASSWORD', 'Monokotil2453+');
+define('MYSQL_PASSWORD', '');
 define('MYSQL_HOST', 'localhost');
 define('MYSQL_DATABASE', 'isg');
 $pdoOptions = array(

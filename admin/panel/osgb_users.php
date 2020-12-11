@@ -150,7 +150,7 @@ if (isset($_POST['kayıt'])) {
             $mail->SetLanguage("tr", "phpmailer/language");
             $mail->CharSet  ="utf-8";
             $mail->Username = "osgbdeneme@gmail.com"; // Mail adresimizin kullanicı adi
-          $mail->Password = "deneme123"; // Mail adresimizin sifresi
+          $mail->Password = ""; // Mail adresimizin sifresi
           $mail->SetFrom("osgbdeneme@gmail.com", "Özgür OSGB"); // Mail attigimizda gorulecek ismimiz
           $mail->AddAddress($email); // Maili gonderecegimiz kisi yani alici
           $mail->addReplyTo($email, $firstname, $lastname);

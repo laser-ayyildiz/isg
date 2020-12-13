@@ -157,9 +157,9 @@ if (isset($_POST['kayıt'])) {
             $mail->Subject = "Çalışan Kaydı"; // Konu basligi
           $mail->Body = "<div style='background:#eee;padding:5px;margin:5px;width:300px;'> eposta : ".$email."</div> <br />
            <p><b>Merhaba $firstname, Özgür OSGB'ye çalışan olarak kaydınız yapılmıştır.<br>Lütfen öncelikle aşağıdaki linki tarayıcınızda açarak üyeliğinizi onaylayın</b></p>
-           <br>http://localhost/isg/admin/register/validate.php?username=".$email."&valid_code=".$kod."
+           <br>http://142.93.97.101/isg/admin/register/validate.php?username=".$email."&valid_code=".$kod."
            <h4><b>Giriş bilgileriniz:</b></h4>
-           <h5><b>Kullanıcı adı:</b></h5>
+           <h5><b>Kullanıcı adı:</b></h5> $email
            <h5><b>Şifre:</b></h5> $pass
            <h4><b>Kullanıcı bilgileriniz:</b></h4>
            <h5><b>Kullanıcı türü:</b></h5> $user_type
@@ -170,16 +170,16 @@ if (isset($_POST['kayıt'])) {
           "; // Mailin icerigi
           if (!$mail->Send()) {
               ?>
-<script type="text/javascript">
-  function getConfirmation() {
-    var retVal = confirm("Veritabanına kaydınız yapıldı fakat onay maili gönderilemedi. Lütfen bizimle ilteşime geçin");
-    if (retVal == true) {
-      return true;
-    }
-  }
-  getConfirmation();
+          <script type="text/javascript">
+            function getConfirmation() {
+              var retVal = confirm("Veritabanına kaydınız yapıldı fakat onay maili gönderilemedi. Lütfen bizimle ilteşime geçin");
+              if (retVal == true) {
+                return true;
+              }
+            }
+            getConfirmation();
 
-</script>
+          </script>
 <?php
           } else {
               if ($user_type == "İsg Uzmanı 1" || $user_type == "İsg Uzmanı 2" || $user_type == "İsg Uzmanı 3") {
@@ -212,14 +212,14 @@ if (isset($_POST['kayıt'])) {
                   $id = $user5->id;
               }
              ?>
-<div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-  <strong>Yeni Çalışan Eklendi!</strong>
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
+            <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
+              <strong>Yeni Çalışan Eklendi!</strong>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
 
-<?php
+              <?php
           }
         }
     }

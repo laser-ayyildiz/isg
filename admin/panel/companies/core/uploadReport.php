@@ -1,29 +1,28 @@
 <?php
 require '../../../connect.php';
 date_default_timezone_set('Europe/Istanbul');
-if (isset($_FILES['ziyaret_dosyası']) && isset($_POST['ziyaret_dosyası_yukle'])) {
+if (isset($_FILES['uploadReportFile']) && isset($_POST['uploadReportBtn'])) {
   $company_name = $_POST['company_name'];
   $dir =  dirname(__DIR__);
-  $rapor_adi = $_POST['visit_report_name'];
-  $rapor_tarihi = date('d-m-Y', strtotime($_POST["visit_report_date"]));
+  $rapor_adi = $_POST['upload_report_name'];
+  $rapor_tarihi = date('d-m-Y', strtotime($_POST["upload_report_date"]));
 
-  $file= $_FILES['ziyaret_dosyası'];
-  $fileName = $_FILES['ziyaret_dosyası']['name'];
-  $fileTmp = $_FILES['ziyaret_dosyası']['tmp_name'];
-  $fileSize = $_FILES['ziyaret_dosyası']['size'];
-  $filesError = $_FILES['ziyaret_dosyası']['error'];
-  $fileType = $_FILES['ziyaret_dosyası']['type'];
-
-  $fileExt = explode('.',$_FILES['ziyaret_dosyası']['name']);
+  $file= $_FILES['uploadReportFile'];
+  $fileName = $_FILES['uploadReportFile']['name'];
+  $fileTmp = $_FILES['uploadReportFile']['tmp_name'];
+  $fileSize = $_FILES['uploadReportFile']['size'];
+  $filesError = $_FILES['uploadReportFile']['error'];
+  $fileType = $_FILES['uploadReportFile']['type'];
+  $fileExt = explode('.',$_FILES['uploadReportFile']['name']);
   $fileActualExt = strtolower(end($fileExt));
   $allowed = array('xlsx','xls','odt','odf','ods','pdf','docx','doc','txt','jpg','jpeg','png','ppt','pptx');
   if(in_array($fileActualExt,$allowed)){
-      if($_FILES['ziyaret_dosyası']['error'] ===  0){
+      if($_FILES['uploadReportFile']['error'] ===  0){
         $fileNameNew = $rapor_adi."_".$rapor_tarihi."_".date('G:i:s')."_";
-        $fileDestination = $dir.'/'.$company_name.'/ziyaret_raporlari/'.$fileNameNew.".".$fileActualExt;
+        $fileDestination = $dir.'/'.$company_name.'/isletme_raporlari/'.$fileNameNew.".".$fileActualExt;
 
-        move_uploaded_file($_FILES['ziyaret_dosyası']['tmp_name'],$fileDestination);
-        header("Location: ../$company_name/index.php?tab=ziyaret_rapor");
+        move_uploaded_file($_FILES['uploadReportFile']['tmp_name'],$fileDestination);
+        header("Location: ../$company_name/index.php?tab=isletme_rapor");
       }else{
         ?>
         <div class='alert alert-danger alert-dismissible fade show' style='margin-bottom: 0 !important;' role='alert'>

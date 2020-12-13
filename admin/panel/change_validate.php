@@ -92,35 +92,58 @@ if (isset($_POST['onay'])) {
     $stmt = $pdo->prepare($sqlque);
     $result = $stmt->execute();
     if ($result) {
+      $sorgu=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `coop_companies`.`name` = '$name' AND `change` = 1");
+      $sorgu->execute();
+      $companies=$sorgu-> fetchAll(PDO::FETCH_OBJ);
+      foreach ($companies as $company) {
+        $changer = $company->changer;
+        $new_id = $company->id;
+      }
 
-    $sorgu=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `coop_companies`.`name` = '$name' AND `change` = 1");
-    $sorgu->execute();
-    $companies=$sorgu-> fetchAll(PDO::FETCH_OBJ);
-    foreach ($companies as $company) {
-      $changer = $company->changer;
+      $sql = "UPDATE `events` SET `company_id` = '$new_id' WHERE `company_id` = '$id'";
+      $stmt = $pdo->prepare($sql);
+      $result3 = $stmt->execute();
+
+      $sql = "UPDATE `coop_workers` SET `company_id` = '$new_id' WHERE `company_id` = '$id'";
+      $stmt = $pdo->prepare($sql);
+      $result4 = $stmt->execute();
+
+      $sql = "UPDATE `equipment` SET `company_id` = '$new_id' WHERE `company_id` = '$id'";
+      $stmt = $pdo->prepare($sql);
+      $result5 = $stmt->execute();
+
+
+      $sorgu=$pdo->prepare("SELECT * FROM `users` WHERE `username` = '$changer'");
+      $sorgu->execute();
+      $users=$sorgu-> fetchAll(PDO::FETCH_OBJ);
+      foreach ($users as $user) {
+        $user_id = $user->id;
+      }
+      $sql = "INSERT INTO `notifications`(`notif_text`, `user_id`)
+      VALUES('$company->name işletmesi üzerinde yaptığınız değişiklikler onaylandı', '$user_id')";
+      $stmt2 = $pdo->prepare($sql);
+      $result2 = $stmt2->execute();
+      if ($result2 && $result3 && $result4 && $result5) {
+      ?>
+      <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
+        <strong>Değişiklikleriniz ONAYLANDI!</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <?php
     }
-    $sorgu=$pdo->prepare("SELECT * FROM `users` WHERE `username` = '$changer'");
-    $sorgu->execute();
-    $users=$sorgu-> fetchAll(PDO::FETCH_OBJ);
-    foreach ($users as $user) {
-      $user_id = $user->id;
+    else {
+      ?>
+      <div class="alert alert-danger alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
+        <strong>Veritabanı ile ilgili bir problem var. Lütfen bizimle iletişime geçin!</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <?php
     }
-    $sql = "INSERT INTO `notifications`(`notif_text`, `user_id`)
-    VALUES('$company->name işletmesi üzerinde yaptığınız değişiklikler onaylandı', '$user_id')";
-    $stmt2 = $pdo->prepare($sql);
-    $result2 = $stmt2->execute();
-    if ($result2) {
-    ?>
-    <div class="alert alert-primary alert-dismissible fade show" style=" margin-bottom: 0 !important;" role="alert">
-      <strong>Değişiklikleriniz ONAYLANDI!</strong>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close" padding="auto">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <?php
   }
-}
-
 }
 ?>
 <!DOCTYPE html>
@@ -368,6 +391,7 @@ if (isset($_POST['onay'])) {
                                   $eski_type = $eski->comp_type;
                                   $eski_mail = $eski->mail;
                                   $eski_phone = $eski->phone;
+                                  $eski_is_veren = $eski->is_veren;
                                   $eski_address = $eski->address;
                                   $eski_city = $eski->city;
                                   $eski_town = $eski->town;
@@ -479,6 +503,16 @@ if (isset($_POST['onay'])) {
                                         <br>
                                         <label for="remi_freq" style="color:red"><strong>Yeni Ziyaret Sıklığı(Ay):&emsp;</strong></label>
                                         <input class="form-control" style="border: 2px solid red;" type="text" placeholder="Ziyaret Sıklığı" name="remi_freq" value="<?= $company->remi_freq ?>" required>
+                                      </div>
+                                    <?php }
+                                    if ($eski_is_veren != $company->is_veren) { ?>
+                                      <div class="col-sm-4">
+                                        <br>
+                                        <label for="eski_is_veren"><strong>Eski İşveren Ad Soyad</strong></label>
+                                        <input class="form-control" type="text" name="eski_is_veren" value="<?= $eski_is_veren ?>" readonly>
+                                        <br>
+                                        <label for="is_veren" style="color:red"><strong>Yeni İşveren Ad Soayd:&emsp;</strong></label>
+                                        <input class="form-control" style="border: 2px solid red;" type="text" placeholder="İşveren Ad Soyad" name="is_veren" value="<?= $company->is_veren ?>" required>
                                       </div>
                                     <?php }
                                     if ($eski_mersis_no != $company->mersis_no) { ?>

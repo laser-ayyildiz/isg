@@ -6,6 +6,7 @@ if(!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])){
     exit;
 }
 require '../connect.php';
+date_default_timezone_set('Europe/Istanbul');
 $id=$_SESSION['user_id'];
 $başlangıç=$pdo->prepare("SELECT * FROM users WHERE id = '$id'");
 $başlangıç->execute();
@@ -16,6 +17,14 @@ foreach($girişler as $giriş){
   $ume = $giriş->username;
   $picture= $giriş->picture;
   $auth = $giriş->auth;
+}
+if ($auth == 7) {
+  $sorgu=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `isletme_id` = '$id' OR `isletme_id_2` = '$id' OR `isletme_id_3` = '$id'");
+  $sorgu->execute();
+  $comps=$sorgu-> fetchAll(PDO::FETCH_OBJ);
+  foreach ($comps as $comp) {
+    $company_name = $comp->name;
+  }
 }
 $bildirim_sil=$pdo->prepare("SELECT * FROM `notifications` WHERE `user_id` = '$id'");
 $bildirim_sil->execute();
@@ -102,11 +111,18 @@ foreach ($events as $event) {
 <body id="page-top">
   <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
     <img width="55" height="40" class="rounded-circle img-profile" src="assets/img/nav_brand.jpg" />
-    <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
+    <?php if ($auth == 7){ ?>
+      <a class="navbar-brand" title="Anasayfa" style="color: black;" href="companies/<?=$company_name?>/index.php?tab=genel_bilgiler"><b><?= mb_convert_case($company_name, MB_CASE_TITLE, "UTF-8") ?></b></a>
+    <?php }
+    else {?>
+      <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
+      <?php
+      }
+      ?>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span></button>
-
+    <?php if ($auth != 7): ?>
     <ul class="navbar-nav navbar-expand mr-auto">
       <li class="nav-item">
       <div class="dropdown no-arrow">
@@ -149,6 +165,7 @@ foreach ($events as $event) {
           }
         ?>
     </ul>
+    <?php endif; ?>
     <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
       <li class="nav-item dropdown no-arrow mx-1">
         <div class="nav-item dropdown no-arrow">

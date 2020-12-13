@@ -23,7 +23,6 @@ for ($row = 2; $row <= $highestRow; ++$row) {
         $value5 = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
         $value6 = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
         $value7 = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
-        $value7 = date('Y-m-d');
 
 
         echo '<td>' . $value1 . '</td>' . PHP_EOL;

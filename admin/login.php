@@ -51,8 +51,19 @@ if ($_POST) {
           //Provide the user with a login session.
           $_SESSION['user_id'] = $user['id'];
           $_SESSION['logged_in'] = time();
-          //Redirect to our protected page, which we called home.php
-          header("Location: panel/index.php");
+          $id = $_SESSION['user_id'];
+          if ($auth == 7) {
+            $sorgu=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `isletme_id` = '$id' OR `isletme_id_2` = '$id' OR `isletme_id_3` = '$id'");
+            $sorgu->execute();
+            $comps=$sorgu-> fetchAll(PDO::FETCH_OBJ);
+            foreach ($comps as $comp) {
+              $company_name = $comp->name;
+            }
+            header("Location: panel/companies/$company_name/index.php?tab=genel_bilgiler");
+          }
+          else {
+            header("Location: panel/index.php");
+          }
         }
       }
 }

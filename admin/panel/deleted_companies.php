@@ -79,14 +79,14 @@ foreach ($girişler as $giriş) {
 </head>
 
 <body id="page-top">
-    <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
+  <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
       <img width="55" height="40" class="rounded-circle img-profile" src="assets/img/nav_brand.jpg" />
       <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span></button>
 
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav navbar-expand mr-auto">
         <li class="nav-item">
         <div class="dropdown no-arrow">
           <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -131,10 +131,13 @@ foreach ($girişler as $giriş) {
       <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
         <li class="nav-item dropdown no-arrow mx-1">
           <div class="nav-item dropdown no-arrow">
+            <?php
+              $bildirim_say = $pdo->query("SELECT COUNT(*) FROM `notifications` WHERE `user_id` = '$id' ORDER BY reg_date")->fetchColumn();
+                    ?>
           <a href="notifications.php" title="Bildirimler" class="nav-link"
-            data-bs-hover-animate="rubberBand"><span
-                class="badge badge-danger badge-counter">3+</span><i style="color: black;"
-                class="fas fa-bell fa-fw"></i></a>
+            data-bs-hover-animate="rubberBand">
+            <i style="color: black;" class="fas fa-bell fa-fw"></i>
+            <span class="badge badge-danger badge-counter"><?= $bildirim_say ?></span></a>
           </div>
         </li>
         <li class="nav-item dropdown no-arrow mx-1">
@@ -143,15 +146,9 @@ foreach ($girişler as $giriş) {
               data-bs-hover-animate="rubberBand">
               <i style="color: black;" class="fas fa-envelope fa-fw"></i>
               <?php
-                    $msg=$pdo->prepare("SELECT * FROM `message` WHERE `kime` = '$ume' ORDER BY tarih");
-                    $msg->execute();
-                    $messages=$msg-> fetchAll(PDO::FETCH_OBJ);
-                    $i = 0;
-                    foreach ($messages as $key=>$message) {
-                        $i++;
-                    }
+                $mesaj_say = $pdo->query("SELECT COUNT(*) FROM `message` WHERE `kime` = '$ume' ORDER BY tarih")->fetchColumn();
                       ?>
-              <span class="badge badge-danger badge-counter"><?=$i?></span></a>
+              <span class="badge badge-danger badge-counter"><?=$mesaj_say?></span></a>
           </div>
           <div class="shadow dropdown-list dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown"></div>
         </li>
@@ -164,10 +161,11 @@ foreach ($girişler as $giriş) {
         </li>
         <div class="d-none d-sm-block topbar-divider"></div>
           <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
+          </div>
       </ul>
-  </div>
-  </nav>
-        <div class="container-fluid">
+    </nav>
+    
+    <div class="container-fluid">
 
           <div class="card shadow-lg">
             <div class="card-header bg-light">

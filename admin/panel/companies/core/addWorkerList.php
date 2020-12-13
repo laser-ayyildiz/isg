@@ -2,6 +2,7 @@
 require '../../../connect.php';
 require '../../vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+date_default_timezone_set('Europe/Istanbul');
 if(isset($_FILES['calisan_list']) && isset($_POST['calisan_yukle'])){
     $dir =  dirname(__DIR__);
     $company_id = $_POST['company_id'];
@@ -42,7 +43,7 @@ if(isset($_FILES['calisan_list']) && isset($_POST['calisan_yukle'])){
                     $value5 = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
                     $value6 = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
                     $value7 = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
-                    $value7 = date('Y-m-d');
+
                 $sql = "INSERT INTO `coop_workers`(`name`, `position`, `sex`, `tc`, `phone`, `mail`, `contract_date`,`company_id`)
                 VALUES('$value1', '$value2', '$value3', '$value4', '$value5', '$value6', '$value7','$company_id')";
                 $stmt = $pdo->prepare($sql);

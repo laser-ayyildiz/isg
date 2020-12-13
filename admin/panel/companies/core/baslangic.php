@@ -13,7 +13,7 @@ foreach ($girişler as $giriş) {
     $giriş_auth = $giriş->auth;
 }
 
-$yetki=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `name` = '$isim'");
+$yetki=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `name` = '$isim' AND `change` = 1");
 $yetki->execute();
 $yets=$yetki-> fetchAll(PDO::FETCH_OBJ);
 foreach ($yets as $yet) {
@@ -36,6 +36,10 @@ foreach ($yets as $yet) {
 
     $yetkili_muhasebe_p_id = $yet->muhasebe_p_id;
     $yetkili_muhasebe_p_id_2 = $yet->muhasebe_p_id_2;
+
+    $yetkili_isletme_id = $yet->isletme_id;
+    $yetkili_isletme_id_2 = $yet->isletme_id_2;
+    $yetkili_isletme_id_3 = $yet->isletme_id_3;
 }
 if ($yetkili_auth != 1) {
     if ($yetkili_hekim_id == $id) {
@@ -63,6 +67,12 @@ if ($yetkili_auth != 1) {
     } elseif ($yetkili_muhasebe_p_id == $id) {
         echo "";
     }elseif ($yetkili_muhasebe_p_id_2 == $id) {
+        echo "";
+    }elseif ($yetkili_isletme_id == $id) {
+        echo "";
+    }elseif ($yetkili_isletme_id_2 == $id) {
+        echo "";
+    }elseif ($yetkili_isletme_id_3 == $id) {
         echo "";
     } else {
         header('Location: ../../403.php');

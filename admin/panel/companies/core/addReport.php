@@ -5,6 +5,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\IReader;
 use PhpOffice\PhpSpreadsheet\Writer\IWriter;
+date_default_timezone_set('Europe/Istanbul');
 if (isset($_POST['addReport_sub'])) {
   $report_name = $_POST['new_report'];
   $company_name = $_POST['company_name'];
@@ -71,14 +72,36 @@ if (isset($_POST['addReport_sub'])) {
     $worksheet->getCell('H33')->setValue(" $h_first $h_last \n $h_tc");
     $worksheet->getCell('L33')->setValue(" $company->is_veren");
 
-    $file_name = 'Yıllık Eğitim Planı_'.date('d-m-Y_h:i:sa').'.xls';
+    $file_name = 'Yıllık Eğitim Planı_'.date('d-m-Y_G:i:s').'_.xls';
     $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xls');
     $writer->save("../$company_name/isletme_raporlari/$file_name");
     header("Location: ../$company_name/index.php?tab=isletme_rapor");
   }
 
-  elseif ($report_name == '') {
-    // code...
+  elseif ($report_name == 'calisma_plan') {
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load('../custom_reports/3-YILLIK ÇALIŞMA PLANI/YILLIK ÇALIŞMA(50 ÜSTÜ).xlsx');
+    $future = new DateTime(date('d-m-Y'));
+    $future->modify('+1 year');
+
+    $today = date('d-m-Y');
+    $future = $future->format('d-m-Y');
+    $worksheet = $spreadsheet->getActiveSheet();
+    $worksheet->getCell('G3')->setValue($company_name);
+    $worksheet->getCell('AQ3')->setValue("Hazırlanma Tarihi: $today\nGeçerlilik Tarihi: $future");
+    $worksheet->getCell('AQ6')->setValue("SGK Sicil No\n$company->sgk_sicil");
+
+    $file_name = 'Yıllık Çalışma Planı_'.date('d-m-Y_G:i:s').'_.xlsx';
+    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+    $writer->save("../$company_name/isletme_raporlari/$file_name");
+    header("Location: ../$company_name/index.php?tab=isletme_rapor");
+
+  }
+  elseif ($report_name == 'takip_liste') {
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load('../custom_reports/30-KLASÖR TAKİP LİSTESİ/İSG KLASÖRÜ TAKİP LİSTESİ.xlsx');
+    $file_name = 'İSG Klasörü Takip Listesi_'.date('d-m-Y_G:i:s').'_.xlsx';
+    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+    $writer->save("../$company_name/isletme_raporlari/$file_name");
+    header("Location: ../$company_name/index.php?tab=isletme_rapor");
   }
 }
 

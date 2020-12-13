@@ -17,6 +17,9 @@ foreach ($girişler as $giriş) {
     $picture = $giriş->picture;
     $auth_ = $giriş->auth;
 }
+if ($auth_ == 5 || $auth_ == 7) {
+    header('Location: ../403.php');
+}
 
 $sql = "SELECT id, title, description, start, end, color FROM events WHERE `user_id` = '$id' ";
 
@@ -112,7 +115,7 @@ $events = $req->fetchAll();
 <body id="page-top">
   <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
     <img width="55" height="40" class="rounded-circle img-profile" src="../assets/img/nav_brand.jpg" />
-    <a class="navbar-brand" title="Anasayfa" style="color: black;" href="../index.php"><b>Özgür OSGB</b></a>
+    <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span></button>
@@ -126,7 +129,7 @@ $events = $req->fetchAll();
               <a class="dropdown-item" type="button" href="../companies.php"><i class="fas fa-stream"></i><span>&nbsp;İşletme Listesi</span></a>
               <a class="dropdown-item" type="button" href="../deleted_companies.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen İşletmeler</span></a>
               <?php
-              if($auth == 1){?>
+              if($auth_ == 1){?>
               <a class="dropdown-item" type="button" href="../change_validate.php"><i class="fas fa-exchange-alt"></i><span>&nbsp;Onay Bekleyenler</span></a>
               <?php }?>
             </div>
@@ -140,7 +143,7 @@ $events = $req->fetchAll();
           <a style="color: black;" class="nav-link btn-warning" href="../calendar/index.php"><i class="fas fa-calendar-alt"></i><span>&nbsp;Takvim</span></a>
         </li>
       <?php
-          if ($auth == 1) {
+          if ($auth_ == 1) {
         ?>
       <li class="nav-item"><a style="color: black;" class="nav-link btn-warning" href="../settings.php"><i
             class="fas fa-wrench"></i><span>&nbsp;Ayarlar</span></a></li>
@@ -192,8 +195,8 @@ $events = $req->fetchAll();
       </li>
       <div class="d-none d-sm-block topbar-divider"></div>
         <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="../logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
-        </div>
     </ul>
+    </div>
   </nav>
     <div class="card shadow-lg">
         <div class="card-header border bg-light">

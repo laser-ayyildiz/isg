@@ -1,5 +1,5 @@
 <?php session_start();
-$isim = 'deneme9';
+$isim = 'deneme10';
 require_once('../../calendar/utils/auth.php');
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
@@ -1038,9 +1038,10 @@ require '../core/scripts.html';
 
           <!--İşletme Raporları -->
           <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="isletme_rapor" role="tabpanel" aria-labelledby="ir-tab">
-            <button class="btn btn-primary" id="ir_form" data-toggle="modal" data-target="#addReport" data-whatever="@getbootstrap">Yeni Rapor Hazırla</button>
+            <button style="float: left;" class="btn btn-primary" id="ir_form" data-toggle="modal" data-target="#addReport" data-whatever="@getbootstrap">Yeni Rapor Hazırla</button>
+            <button style="float: right;" class="btn btn-primary" id="ir_form2" data-toggle="modal" data-target="#uploadReport" data-whatever="@getbootstrap">Rapor Yükle</button>
             <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-              <table class="table table-striped table-bordered table-hover table-sm" id="dataTable">
+              <table class="table table-striped table-bordered table-hover table-sm mt-2" id="dataTable">
                 <thead class="thead-dark">
                   <tr>
                     <th>Dosya Adı</th>
@@ -1057,7 +1058,7 @@ require '../core/scripts.html';
                             ?>
                   <tr>
                     <td><b><?= $file_name[0] ?></b></td>
-                    <td><b><?= $file_name[1].' '.$file_name[2] ?></b></td>
+                    <td><b><?= $file_name[1].', '.$file_name[2] ?></b></td>
                     <td><input class="btn btn-success btn-sm" style="width:80px" type="button" value="İndir" onclick="window.location.href='isletme_raporlari/<?=$file?>';" /></td>
                   </tr>
                   <?php
@@ -1096,8 +1097,8 @@ require '../core/scripts.html';
                             $file_name = explode("_", $name);
                             ?>
                   <tr>
-                    <td><?= $file_name[1] ?></td>
-                    <td><?= $file_name[0] ?></td>
+                    <td><b><?= $file_name[0] ?></b></td>
+                    <td><b><?= $file_name[1] ?></b></td>
                     <td><input class="btn btn-success btn-sm" style="width:80px" type="button" value="İndir" onclick="window.location.href='ziyaret_raporlari/<?=$file?>';" /></td>
                   </tr>
                   <?php
@@ -1436,6 +1437,7 @@ require '../core/scripts.html';
                 <div class="row col-12">
                   <label for="visit_report_name">
                     <h5><b>Raporun Adını Giriniz</b></h5>
+                    <a style="color:red">*Lütfen dosya isminde "_" (alt çizgi) karakteri kullanmayın!</a>
                   </label>
                   <input name="visit_report_name" id="visit_report_name" class="form-control" type="text" maxlength="20" placeholder="Rapor Adı" required>
                 </div>
@@ -1452,6 +1454,45 @@ require '../core/scripts.html';
                   <input type="text" name="company_name" value="<?= $isim ?>" hidden>
                   <input type="file" class="btn btn-sm" name="ziyaret_dosyası" id="ziyaret_dosyası" style="margin-right:auto;" required>
                   <button type="submit" class="btn btn-primary" name="ziyaret_dosyası_yukle" id="ziyaret_dosyası_yukle">Yükle</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div><!-- addVisitReport end-->
+
+      <!-- Yeni İşletme Raporu Yükleme modal-->
+      <div class="modal fade" id="uploadReport" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-light">
+              <h5 class="modal-title" id="exampleModalLabel"><b>İşletmeye Ait Rapor Ekle</b></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form action="../core/uploadReport.php" method="POST" enctype="multipart/form-data">
+                <div class="row col-12">
+                  <label for="upload_report_name">
+                    <h5><b>Raporun Adını Giriniz</b></h5>
+                    <a style="color:red">*Lütfen dosya isminde "_" (alt çizgi) karakteri kullanmayın!</a>
+                  </label>
+                  <input name="upload_report_name" id="upload_report_name" class="form-control" type="text" maxlength="40" placeholder="Rapor Adı" required>
+                </div>
+                <br>
+                <div class="row col-12">
+                  <label for="visit_report_date">
+                    <h5><b>Raporun Tarihini Giriniz</b></h5>
+                  </label>
+                  <input name="upload_report_date" id="upload_report_date" class="form-control" type="date" required>
+                </div>
+                <br>
+                <div class="modal-footer">
+                  <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                  <input type="text" name="company_name" value="<?= $isim ?>" hidden>
+                  <input type="file" class="btn btn-sm" name="uploadReportFile" id="uploadReportFile" style="margin-right:auto;" required>
+                  <button type="submit" class="btn btn-primary" name="uploadReportBtn" id="uploadReportBtn">Yükle</button>
                 </div>
               </form>
             </div>
@@ -1519,7 +1560,7 @@ require '../core/scripts.html';
         </div>
       </div><!-- addEquipment end-->
 
-      <!-- Yeni Rapor Ekle-->
+      <!-- Yeni Rapor Hazırla-->
       <div class="modal fade" id="addReport" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">

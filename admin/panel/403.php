@@ -17,8 +17,13 @@ foreach ($girişler as $giriş) {
     $picture= $giriş->picture;
     $auth = $giriş->auth;
 }
-if ($auth == 5 || $auth == 7) {
-    header('Location: 403.php');
+if ($auth == 7) {
+  $sorgu=$pdo->prepare("SELECT * FROM `coop_companies` WHERE `isletme_id` = '$id' OR `isletme_id_2` = '$id' OR `isletme_id_3` = '$id'");
+  $sorgu->execute();
+  $comps=$sorgu-> fetchAll(PDO::FETCH_OBJ);
+  foreach ($comps as $comp) {
+    $company_name = $comp->name;
+  }
 }
 ?>
 <!DOCTYPE html>
@@ -74,53 +79,59 @@ if ($auth == 5 || $auth == 7) {
 <body id="page-top">
   <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
     <img width="55" height="40" class="rounded-circle img-profile" src="assets/img/nav_brand.jpg" />
-    <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
+    <?php if ($auth == 7){ ?>
+      <a class="navbar-brand" title="Anasayfa" style="color: black;" href="companies/<?=$company_name?>/index.php?tab=genel_bilgiler"><b><?= mb_convert_case($company_name, MB_CASE_TITLE, "UTF-8") ?></b></a>
+    <?php }
+    else { ?>
+      <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php"><b>Özgür OSGB</b></a>
+      <?php } ?>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span></button>
-
-    <ul class="navbar-nav navbar-expand mr-auto">
-      <li class="nav-item">
-      <div class="dropdown no-arrow">
-        <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-building"></i><span>&nbsp;İşletmeler</span></a>
-            <div class="dropdown-content" aria-labelledby="dropdownMenu2">
-              <a class="dropdown-item" type="button" href="companies.php"><i class="fas fa-stream"></i><span>&nbsp;İşletme Listesi</span></a>
-              <a class="dropdown-item" type="button" href="deleted_companies.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen İşletmeler</span></a>
-              <?php
-              if($auth == 1){?>
-              <a class="dropdown-item" type="button" href="change_validate.php"><i class="fas fa-exchange-alt"></i><span>&nbsp;Onay Bekleyenler</span></a>
-              <?php }?>
-            </div>
-      </div>
-      </li>
-      <li class="nav-item">
-        <a style="color: black;" class="nav-link btn-warning" href="reports.php"><i
-            class="fas fa-folder"></i><span>&nbsp;Raporlar</span></a>
-      </li>
-      <li class="nav-item">
-          <a style="color: black;" class="nav-link btn-warning" href="calendar/index.php"><i class="fas fa-calendar-alt"></i><span>&nbsp;Takvim</span></a>
+      <?php if ($auth != 7){ ?>
+        <ul class="navbar-nav navbar-expand mr-auto">
+        <li class="nav-item">
+        <div class="dropdown no-arrow">
+          <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-building"></i><span>&nbsp;İşletmeler</span></a>
+              <div class="dropdown-content" aria-labelledby="dropdownMenu2">
+                <a class="dropdown-item" type="button" href="companies.php"><i class="fas fa-stream"></i><span>&nbsp;İşletme Listesi</span></a>
+                <a class="dropdown-item" type="button" href="deleted_companies.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen İşletmeler</span></a>
+                <?php
+                if($auth == 1){?>
+                <a class="dropdown-item" type="button" href="change_validate.php"><i class="fas fa-exchange-alt"></i><span>&nbsp;Onay Bekleyenler</span></a>
+                <?php }?>
+              </div>
+        </div>
         </li>
-      <?php
-          if ($auth == 1) {
-        ?>
-      <li class="nav-item"><a style="color: black;" class="nav-link btn-warning" href="settings.php"><i
-            class="fas fa-wrench"></i><span>&nbsp;Ayarlar</span></a></li>
-      <li class="nav-item">
-      <div class="dropdown no-arrow">
-        <button style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
-            class="fas fa-users"></i><span>&nbsp;Çalışanlar</span></button>
-            <div class="dropdown-content" aria-labelledby="dropdownMenu2">
-              <a class="dropdown-item" type="button" href="osgb_users.php"><i class="fas fa-stream"></i><span>&nbsp;Çalışan Listesi</span></a>
-              <a class="dropdown-item" type="button" href="deleted_workers.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen Çalışanlar</span></a>
-              <a class="dropdown-item" type="button" href="authentication.php"><i class="fas fa-user-edit"></i><span>&nbsp;Yetkilendir</span></a>
-            </div>
-      </div>
-      </li>
-      <?php
-          }
-        ?>
-    </ul>
+        <li class="nav-item">
+          <a style="color: black;" class="nav-link btn-warning" href="reports.php"><i
+              class="fas fa-folder"></i><span>&nbsp;Raporlar</span></a>
+        </li>
+        <li class="nav-item">
+            <a style="color: black;" class="nav-link btn-warning" href="calendar/index.php"><i class="fas fa-calendar-alt"></i><span>&nbsp;Takvim</span></a>
+          </li>
+        <?php
+            if ($auth == 1) {
+          ?>
+        <li class="nav-item"><a style="color: black;" class="nav-link btn-warning" href="settings.php"><i
+              class="fas fa-wrench"></i><span>&nbsp;Ayarlar</span></a></li>
+        <li class="nav-item">
+        <div class="dropdown no-arrow">
+          <button style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
+              class="fas fa-users"></i><span>&nbsp;Çalışanlar</span></button>
+              <div class="dropdown-content" aria-labelledby="dropdownMenu2">
+                <a class="dropdown-item" type="button" href="osgb_users.php"><i class="fas fa-stream"></i><span>&nbsp;Çalışan Listesi</span></a>
+                <a class="dropdown-item" type="button" href="deleted_workers.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen Çalışanlar</span></a>
+                <a class="dropdown-item" type="button" href="authentication.php"><i class="fas fa-user-edit"></i><span>&nbsp;Yetkilendir</span></a>
+              </div>
+        </div>
+        </li>
+        <?php
+            }
+          ?>
+      </ul>
+      <?php } ?>
     <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
       <li class="nav-item dropdown no-arrow mx-1">
         <div class="nav-item dropdown no-arrow">
@@ -163,7 +174,12 @@ if ($auth == 5 || $auth == 7) {
         <p class="m-0">403</p>
       </div>
       <p class="text-dark mb-5 lead">Bu sayfaya erişim yetkiniz yok</p>
+      <?php if ($auth == 7){ ?>
+        <a href="companies/<?=$company_name?>/index.php?tab=genel_bilgiler">← Ana Sayfaya Geri Dön</a>
+      <?php }
+      else{ ?>
       <p class="text-black-50 mb-0"></p>Bir sorun olduğunu düşünüyorsanız yöneticiniz ile görüşün<br><a href="index.php">← Ana Sayfaya Geri Dön</a>
+    <?php } ?>
     </div>
   </div>
 

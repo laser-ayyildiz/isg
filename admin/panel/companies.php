@@ -36,10 +36,10 @@ if (isset($_POST['kaydet'])) {
     $name = !empty($_POST['name']) ? trim($_POST['name']) : null;
     $email = !empty($_POST['email']) ? trim($_POST['email']) : null;
     $phone = !empty($_POST['phone']) ? trim($_POST['phone']) : null;
+    $is_veren = !empty($_POST['is_veren']) ? trim($_POST['is_veren']) : null;
     $city = !empty($_POST['countrySelect']) ? trim($_POST['countrySelect']) : null;
     $town = !empty($_POST['citySelect']) ? trim($_POST['citySelect']) : null;
     $contract_date = !empty($_POST['contract_date']) ? trim($_POST['contract_date']) : null;
-    $contract_date = date('Y-m-d');
 
     $uzman_id = !empty($_POST['uzman_id']) ? trim($_POST['uzman_id']) : 0;
     $uzman_id_2 = !empty($_POST['uzman_id_2']) ? trim($_POST['uzman_id_2']) : 0;
@@ -87,10 +87,10 @@ if (isset($_POST['kaydet'])) {
 </div>
 <?php
     } else {
-        $sql = "INSERT INTO `coop_companies`(`comp_type`, `name`, `mail`, `phone`, `address`, `city`, `town`, `contract_date`, `uzman_id`, `uzman_id_2`, `uzman_id_3`,
+        $sql = "INSERT INTO `coop_companies`(`comp_type`, `name`, `mail`, `phone`, `is_veren`, `address`, `city`, `town`, `contract_date`, `uzman_id`, `uzman_id_2`, `uzman_id_3`,
           `hekim_id`, `hekim_id_2`, `hekim_id_3`, `saglık_p_id`, `saglık_p_id_2`, `ofis_p_id`, `ofis_p_id_2`, `muhasebe_p_id`, `muhasebe_p_id_2`, `remi_freq`,
           `nace_kodu`,`mersis_no`,`sgk_sicil`,`vergi_no`,`vergi_dairesi`,`katip_is_yeri_id`,`katip_kurum_id`)
-        VALUES('$comp_type', '$name', '$email', '$phone', '$address', '$city', '$town', '$contract_date', '$uzman_id', '$uzman_id_2', '$uzman_id_3',
+        VALUES('$comp_type', '$name', '$email', '$phone', '$is_veren' ,'$address', '$city', '$town', '$contract_date', '$uzman_id', '$uzman_id_2', '$uzman_id_3',
            '$hekim_id', '$hekim_id_2', '$hekim_id_3', '$saglık_p_id', '$saglık_p_id_2', '$ofis_p_id', '$ofis_p_id_2', '$muhasebe_p_id', '$muhasebe_p_id_2', '$remi_freq',
            '$nace_kodu','$mersis_no','$sgk_sicil','$vergi_no','$vergi_dairesi','$katip_is_yeri_id','$katip_kurum_id')";
         $stmt = $pdo->prepare($sql);
@@ -401,6 +401,10 @@ $isim$is = '$name';
                                   <div class="col-sm-6">
                                     <label for="phone"><h5><strong>İşletme Telefon No<a style="color:red">*</a></strong></h5></label>
                                     <input class="form-control" type="tel" name="phone" id="phone" placeholder="Tel: 0XXXXXXXXXX" pattern="(\d{4})(\d{3})(\d{2})(\d{2})" maxlength="11" required>
+                                  </div>
+                                  <div class="col-sm-6">
+                                    <label for="is_veren"><h5><strong>İşveren Ad Soyad<a style="color:red">*</a></strong></h5></label>
+                                    <input class="form-control" type="text" name="is_veren" id="is_veren" placeholder="İşveren Ad Soyad" maxlength="50" required>
                                   </div>
                                 </div>
                                 <br>
@@ -1051,15 +1055,18 @@ $isim$is = '$name';
     <script>
 
       $('#next1').click(function () {
-        	if( $('#comp_type').val() && $('#name').val() && $('#contract_date').val()&& $('#address').val() && $('#email').val()  && $('#phone').val()  && $('#citySelect').val()  && $('#countrySelect').val()) {
+        	if($('#comp_type').val() && $('#name').val() && $('#contract_date').val()&& $('#address').val()
+          && $('#email').val()  && $('#phone').val()  && $('#citySelect').val()
+           && $('#countrySelect').val() && $('#is_veren').val()) {
          		$('.nav-tabs > .nav-item > .active').parent().next('li').find('a').trigger('click');
       	}else {
           window.alert("Lütfen zorunlu(*) alanları doldurun");
         }
         });
       $('#kaydet').click(function () {
-        if( !$('#comp_type').val() && !$('#name').val() && !$('#contract_date').val()
-        && !$('#address').val() && !$('#email').val()  && !$('#phone').val()  && !$('#citySelect').val() && !$('#countrySelect').val()) {
+        if(!$('#comp_type').val() && !$('#name').val() && !$('#contract_date').val()
+        && !$('#address').val() && !$('#email').val()  && !$('#phone').val()
+        && !$('#citySelect').val() && !$('#countrySelect').val() && !$('#is_veren').val()) {
           window.alert("Lütfen zorunlu(*) alanları doldurun");
           return false;
         }
@@ -1072,15 +1079,17 @@ $isim$is = '$name';
         });
 
         $('#link2-tab').click(function () {
-          if( !$('#comp_type').val() && !$('#name').val() && !$('#contract_date').val()
-          && !$('#address').val() && !$('#email').val()  && !$('#phone').val()  && !$('#citySelect').val() && !$('#countrySelect').val()) {
+          if(!$('#comp_type').val() && !$('#name').val() && !$('#contract_date').val()
+          && !$('#address').val() && !$('#email').val()  && !$('#phone').val()
+          && !$('#citySelect').val() && !$('#countrySelect').val() && !$('#is_veren').val()) {
             window.alert("Lütfen zorunlu(*) alanları doldurun");
             return false;
           }
         });
         $('#link3-tab').click(function () {
-          if( !$('#comp_type').val() && !$('#name').val() && !$('#contract_date').val()
-          && !$('#address').val() && !$('#email').val()  && !$('#phone').val()  && !$('#citySelect').val() && !$('#countrySelect').val()) {
+          if(!$('#comp_type').val() && !$('#name').val() && !$('#contract_date').val()
+          && !$('#address').val() && !$('#email').val()  && !$('#phone').val()
+           && !$('#citySelect').val() && !$('#countrySelect').val() && !$('#is_veren').val()) {
             window.alert("Lütfen zorunlu(*) alanları doldurun");
             return false;
           }

@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
     header('Location: ../login.php');
     exit;
 }
+date_default_timezone_set('Europe/Istanbul');
 $id=$_SESSION['user_id'];
 $başlangıç=$pdo->prepare("SELECT * FROM users WHERE id = '$id'");
 $başlangıç->execute();
@@ -392,34 +393,6 @@ foreach ($events as $event) {
             <div class="progress mb-4">
               <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" aria-valuenow="<?= $az_tehlikeli_say ?>" aria-valuemin="0" aria-valuemax="100"
                 style="width: <?= $az_tehlikeli_say ?>%;"><span class="sr-only"><?= $az_tehlikeli_say ?>%</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="row">
-          <div class="col-lg-6 mb-4">
-            <div class="card text-white bg-warning shadow">
-              <div class="card-body">
-                <p class="m-0">Kısa Zamanda Doldurulması Gereken Raporlar</p>
-                <p class="text-white-50 small m-0">55</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6 mb-4">
-            <div class="card text-white bg-danger shadow">
-              <div class="card-body">
-                <p class="m-0">Acil Olarak Doldurulması Gereken Raporlar</p>
-                <p class="text-white-50 small m-0">15</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card text-white bg-primary shadow">
-              <div class="card-body">
-                <p class="m-0">Doldurulmuş Raporlar</p>
-                <p class="text-white-50 small m-0">350</p>
-              </div>
             </div>
           </div>
         </div>

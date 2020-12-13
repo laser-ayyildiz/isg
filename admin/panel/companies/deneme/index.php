@@ -1,5 +1,5 @@
 <?php session_start();
-$isim = 'deneme9';
+$isim = 'deneme';
 require_once('../../calendar/utils/auth.php');
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
@@ -99,53 +99,15 @@ require '../core/scripts.html';
 <body id="page-top">
   <nav class="navbar shadow navbar-expand mb-3 bg-warning topbar static-top">
     <img width="55" height="40" class="rounded-circle img-profile" src="../../assets/img/nav_brand.jpg" />
+    <?php if ($giriş_auth == 7){ ?>
+      <a class="navbar-brand" title="Anasayfa" style="color: black;" href="index.php?tab=genel_bilgiler"><b><?= mb_convert_case($isim, MB_CASE_TITLE, "UTF-8") ?></b></a>
+    <?php }
+    else{ ?>
     <a class="navbar-brand" title="Anasayfa" style="color: black;" href="../../index.php"><b>Özgür OSGB</b></a>
+  <?php } ?>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span></button>
-
-    <ul class="navbar-nav navbar-expand mr-auto">
-      <li class="nav-item">
-      <div class="dropdown no-arrow">
-        <a style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-building"></i><span>&nbsp;İşletmeler</span></a>
-            <div class="dropdown-content" aria-labelledby="dropdownMenu2">
-              <a class="dropdown-item" type="button" href="../../companies.php"><i class="fas fa-stream"></i><span>&nbsp;İşletme Listesi</span></a>
-              <a class="dropdown-item" type="button" href="../../deleted_companies.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen İşletmeler</span></a>
-              <?php
-              if($auth == 1){?>
-              <a class="dropdown-item" type="button" href="../../change_validate.php"><i class="fas fa-exchange-alt"></i><span>&nbsp;Onay Bekleyenler</span></a>
-              <?php }?>
-            </div>
-      </div>
-      </li>
-      <li class="nav-item">
-        <a style="color: black;" class="nav-link btn-warning" href="../../reports.php"><i
-            class="fas fa-folder"></i><span>&nbsp;Raporlar</span></a>
-      </li>
-      <li class="nav-item">
-          <a style="color: black;" class="nav-link btn-warning" href="../../calendar/index.php"><i class="fas fa-calendar-alt"></i><span>&nbsp;Takvim</span></a>
-        </li>
-      <?php
-          if ($auth == 1) {
-        ?>
-      <li class="nav-item"><a style="color: black;" class="nav-link btn-warning" href="../../settings.php"><i
-            class="fas fa-wrench"></i><span>&nbsp;Ayarlar</span></a></li>
-      <li class="nav-item">
-      <div class="dropdown no-arrow">
-        <button style="color:black;" class="nav-link btn btn-warning dropdown-toggle"type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
-            class="fas fa-users"></i><span>&nbsp;Çalışanlar</span></button>
-            <div class="dropdown-content" aria-labelledby="dropdownMenu2">
-              <a class="dropdown-item" type="button" href="../../osgb_users.php"><i class="fas fa-stream"></i><span>&nbsp;Çalışan Listesi</span></a>
-              <a class="dropdown-item" type="button" href="../../deleted_workers.php"><i class="fas fa-eraser"></i><span>&nbsp;Silinen Çalışanlar</span></a>
-              <a class="dropdown-item" type="button" href="../../authentication.php"><i class="fas fa-user-edit"></i><span>&nbsp;Yetkilendir</span></a>
-            </div>
-      </div>
-      </li>
-      <?php
-          }
-        ?>
-    </ul>
     <ul class="nav navbar-nav navbar-expand flex-nowrap ml-auto">
       <li class="nav-item dropdown no-arrow mx-1">
         <div class="nav-item dropdown no-arrow">
@@ -178,7 +140,7 @@ require '../core/scripts.html';
               class="rounded-circle img-profile" src="../../assets/users/<?=$picture?>"></a>
       </li>
       <div class="d-none d-sm-block topbar-divider"></div>
-        <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
+        <li class="nav-item"><a style="color: black;" title="Çıkış" class="nav-link" href="../../logout.php"><i class="fas fa-sign-out-alt"></i><span>&nbsp;Çıkış</span></a></li>
         </div>
     </ul>
   </nav>
@@ -228,13 +190,21 @@ require '../core/scripts.html';
           <!--Genel Bilgiler -->
           <div class="tab-pane fade show <?php echo $_GET['tab'] === 'genel_bilgiler' ? 'active' : ''; ?>" id="genel_bilgiler" role="tabpanel" aria-labelledby="gb-tab">
             <fieldset id="gb_form">
-              <button style="float:right;" class="btn btn-danger" data-toggle="modal" data-target="#changeCompany" data-whatever="@getbootstrap">İşletme Bilgilerini Değiştir / İşletmeyi Sil</button>
+              <button style="float:right;" class="btn btn-success ml-1" data-toggle="modal" data-target="#addUser" id="addUserBtn" data-whatever="@getbootstrap">Kullanıcı Oluştur</button>
+              <button style="float:right;" class="btn btn-danger" data-toggle="modal" data-target="#changeCompany" id="changeCompanyBtn" data-whatever="@getbootstrap">İşletme Bilgilerini Değiştir / İşletmeyi Sil</button>
               <div class="form-row">
-                <div class="form-group col-lg-4">
+                <div class="form-group col-lg-3">
                   <label for="comp_type_show">
                     <h5><b>Sektör</b></h5>
                   </label>
                   <input class="form-control" id="comp_type_show" name="comp_type_show" required value="<?= $company->comp_type ?>"</input>
+                  </select>
+                </div>
+                <div class="form-group col-lg-4">
+                  <label for="is_veren_show">
+                    <h5><b>İşveren Ad Soyad</b></h5>
+                  </label>
+                  <input class="form-control" id="is_veren_show" name="is_veren_show" required value="<?= $company->is_veren ?>"</input>
                   </select>
                 </div>
               </div>
@@ -1038,9 +1008,10 @@ require '../core/scripts.html';
 
           <!--İşletme Raporları -->
           <div class="tab-pane fade show <?php echo $_GET['tab'] === 'isletme_rapor' ? 'active' : ''; ?>" id="isletme_rapor" role="tabpanel" aria-labelledby="ir-tab">
-            <button class="btn btn-primary" id="ir_form" data-toggle="modal" data-target="#addReport" data-whatever="@getbootstrap">Yeni Rapor Hazırla</button>
+            <button style="float: left;" class="btn btn-primary" id="ir_form" data-toggle="modal" data-target="#addReport" data-whatever="@getbootstrap">Yeni Rapor Hazırla</button>
+            <button style="float: right;" class="btn btn-primary" id="ir_form2" data-toggle="modal" data-target="#uploadReport" data-whatever="@getbootstrap">Rapor Yükle</button>
             <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-              <table class="table table-striped table-bordered table-hover table-sm" id="dataTable">
+              <table class="table table-striped table-bordered table-hover table-sm mt-2" id="dataTable">
                 <thead class="thead-dark">
                   <tr>
                     <th>Dosya Adı</th>
@@ -1057,7 +1028,7 @@ require '../core/scripts.html';
                             ?>
                   <tr>
                     <td><b><?= $file_name[0] ?></b></td>
-                    <td><b><?= $file_name[1].' '.$file_name[2] ?></b></td>
+                    <td><b><?= $file_name[1].', '.$file_name[2] ?></b></td>
                     <td><input class="btn btn-success btn-sm" style="width:80px" type="button" value="İndir" onclick="window.location.href='isletme_raporlari/<?=$file?>';" /></td>
                   </tr>
                   <?php
@@ -1096,8 +1067,8 @@ require '../core/scripts.html';
                             $file_name = explode("_", $name);
                             ?>
                   <tr>
-                    <td><?= $file_name[1] ?></td>
-                    <td><?= $file_name[0] ?></td>
+                    <td><b><?= $file_name[0] ?></b></td>
+                    <td><b><?= $file_name[1] ?></b></td>
                     <td><input class="btn btn-success btn-sm" style="width:80px" type="button" value="İndir" onclick="window.location.href='ziyaret_raporlari/<?=$file?>';" /></td>
                   </tr>
                   <?php
@@ -1436,6 +1407,7 @@ require '../core/scripts.html';
                 <div class="row col-12">
                   <label for="visit_report_name">
                     <h5><b>Raporun Adını Giriniz</b></h5>
+                    <a style="color:red">*Lütfen dosya isminde "_" (alt çizgi) karakteri kullanmayın!</a>
                   </label>
                   <input name="visit_report_name" id="visit_report_name" class="form-control" type="text" maxlength="20" placeholder="Rapor Adı" required>
                 </div>
@@ -1452,6 +1424,45 @@ require '../core/scripts.html';
                   <input type="text" name="company_name" value="<?= $isim ?>" hidden>
                   <input type="file" class="btn btn-sm" name="ziyaret_dosyası" id="ziyaret_dosyası" style="margin-right:auto;" required>
                   <button type="submit" class="btn btn-primary" name="ziyaret_dosyası_yukle" id="ziyaret_dosyası_yukle">Yükle</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div><!-- addVisitReport end-->
+
+      <!-- Yeni İşletme Raporu Yükleme modal-->
+      <div class="modal fade" id="uploadReport" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-light">
+              <h5 class="modal-title" id="exampleModalLabel"><b>İşletmeye Ait Rapor Ekle</b></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form action="../core/uploadReport.php" method="POST" enctype="multipart/form-data">
+                <div class="row col-12">
+                  <label for="upload_report_name">
+                    <h5><b>Raporun Adını Giriniz</b></h5>
+                    <a style="color:red">*Lütfen dosya isminde "_" (alt çizgi) karakteri kullanmayın!</a>
+                  </label>
+                  <input name="upload_report_name" id="upload_report_name" class="form-control" type="text" maxlength="40" placeholder="Rapor Adı" required>
+                </div>
+                <br>
+                <div class="row col-12">
+                  <label for="visit_report_date">
+                    <h5><b>Raporun Tarihini Giriniz</b></h5>
+                  </label>
+                  <input name="upload_report_date" id="upload_report_date" class="form-control" type="date" required>
+                </div>
+                <br>
+                <div class="modal-footer">
+                  <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                  <input type="text" name="company_name" value="<?= $isim ?>" hidden>
+                  <input type="file" class="btn btn-sm" name="uploadReportFile" id="uploadReportFile" style="margin-right:auto;" required>
+                  <button type="submit" class="btn btn-primary" name="uploadReportBtn" id="uploadReportBtn">Yükle</button>
                 </div>
               </form>
             </div>
@@ -1519,7 +1530,7 @@ require '../core/scripts.html';
         </div>
       </div><!-- addEquipment end-->
 
-      <!-- Yeni Rapor Ekle-->
+      <!-- Yeni Rapor Hazırla-->
       <div class="modal fade" id="addReport" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
@@ -1648,6 +1659,12 @@ require '../core/scripts.html';
                             <h5><strong>İşletme Telefon No</strong></h5>
                           </label>
                           <input class="form-control" type="tel" name="phone" id="phone" placeholder="Tel: 0XXXXXXXXXX" pattern="(\d{4})(\d{3})(\d{2})(\d{2})" maxlength="11" required value="<?= $company->phone?>">
+                        </div>
+                        <div class="col-sm-6">
+                          <label for="is_veren">
+                            <h5><strong>İşveren Ad Soyad</strong></h5>
+                          </label>
+                          <input class="form-control" type="tel" name="is_veren" id="is_veren" maxlength="50" required value="<?= $company->is_veren?>">
                         </div>
                       </div>
                       <br>
@@ -2331,6 +2348,9 @@ require '../core/scripts.html';
                     </div>
                     <div class="modal-footer">
                       <input type="text" name="changer" value="<?= $un ?>" hidden>
+                      <input type="number" name="isletme_id" value="<?= $company->isletme_id ?>" hidden>
+                      <input type="number" name="isletme_id_2" value="<?= $company->isletme_id_2 ?>" hidden>
+                      <input type="number" name="isletme_id_3" value="<?= $company->isletme_id_3 ?>" hidden>
                       <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
                       <input type="text" name="company_name" value="<?= $isim ?>" hidden>
                       <button class="btn btn-danger btn-lg" name="sil" onClick='return confirmSubmit()' style="margin-right: auto;">İşletmeyi Sil</button>
@@ -2344,6 +2364,53 @@ require '../core/scripts.html';
         </form>
       </div>
 
+      <!-- Yeni Kullanıcı Oluştur-->
+      <div class="modal fade" id="addUser" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-light">
+              <h5 class="modal-title" id="exampleModalLabel"><b>Yeni Kullanıcı Oluştur</b></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form action="../core/addCompanyUser.php" method="POST">
+                <div class="row">
+                  <div class="col-sm">
+                    <label for="firstname"><strong>Adı</strong></label>
+                    <input type="text" class="form-control" placeholder="Adı" name="cu_firstname" required>
+                  </div>
+                  <div class="col-sm">
+                    <label for="lastname"><strong>Soy Adı </strong></label>
+                    <input type="text" class="form-control" placeholder="Soy Adı" name="cu_lastname" required>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-sm-10">
+                    <label for="email"><strong>E-mail </strong></label>
+                    <input type="email" class="form-control" placeholder="E-mail" name="cu_username" required>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <label for="phone"><strong>Telefon No </strong></label>
+                    <input type="tel" class="form-control" name="cu_phone" placeholder="Tel: 05XXXXXXXXX" pattern="(\d{4})(\d{3})(\d{2})(\d{2})" maxlength="11" required>
+                  </div>
+                </div>
+                <br>
+                <div style="float: right;">
+                  <input type="number" name="company_id" value="<?= $company_id ?>" hidden>
+                  <input type="text" name="company_name" value="<?= $isim ?>" hidden>
+                  <button id="kayıt" name="cu_kayıt" type="submit" class="btn btn-success">Kaydet</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div><!-- addUser end-->
     </div>
     <!--card end-->
   </div>
@@ -2381,17 +2448,21 @@ require '../core/scripts.html';
   <script src='../../calendar/js/fullcalendar.min.js'></script>
   <script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js'></script>
   <?php
-    if ($giriş_auth != 0 && $giriş_auth != 1 && $giriş_auth != 2 && $giriş_auth != 3) {
+    if ($giriş_auth != 0 && $giriş_auth != 1 && $giriş_auth != 2 && $giriş_auth != 3 && $giriş_auth != 4) {
    ?>
     <script>
+      $('#ic_form1').prop('disabled', true);
+      $('#ic_form2').prop('disabled', true);
+      $('#ir_form').prop('disabled', true);
+      $('#ir_form2').prop('disabled', true);
+      $('#addUserBtn').prop('disabled', true);
+      $('#changeCompanyBtn').prop('disabled', true);
       $('#gb_form').prop('disabled', true);
       $('#oc_form').prop('disabled', true);
       $('#db_form').prop('disabled', true);
-      $('#kaydet').prop('hidden', true);
-      $('#zr_form').prop('hidden', true);
-      $('#ie_button').prop('hidden', true);
+      $('#zr_form').prop('disabled', true);
+      $('#ie_button').prop('disabled', true);
       $('#sc-tab').prop('hidden', true);
-      $('#deleteWorkerButton').prop('disabled', true);
     </script>
     <?php
       }

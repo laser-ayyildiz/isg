@@ -66,7 +66,7 @@ if (isset($_POST['register'])) {
             $mail->SetLanguage("tr", "phpmailer/language");
             $mail->CharSet  ="utf-8";
             $mail->Username = "osgbdeneme@gmail.com"; // Mail adresimizin kullanicı adi
-                $mail->Password = "deneme123"; // Mail adresimizin sifresi
+                $mail->Password = ""; // Mail adresimizin sifresi
                 $mail->SetFrom("osgbdeneme@gmail.com", $firstname); // Mail attigimizda gorulecek ismimiz
                 $mail->AddAddress($username); // Maili gonderecegimiz kisi yani alici
                 $mail->addReplyTo($username, $firstname, $lastname);

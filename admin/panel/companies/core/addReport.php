@@ -7,15 +7,20 @@ use PhpOffice\PhpSpreadsheet\Reader\IReader;
 use PhpOffice\PhpSpreadsheet\Writer\IWriter;
 date_default_timezone_set('Europe/Istanbul');
 if (isset($_POST['addReport_sub'])) {
+
   $report_name = $_POST['new_report'];
   $company_name = $_POST['company_name'];
-  $sorgu = $pdo->prepare("SELECT * FROM `coop_companies` WHERE `name` = '$company_name'");
+
+  $sorgu = $pdo->prepare("SELECT * FROM `coop_companies` WHERE `name` = '$company_name' AND `change` = '1'");
   $sorgu->execute();
   $companies=$sorgu->fetchAll(PDO::FETCH_OBJ);
   foreach ($companies as $company) {
     $danger_type = $company->danger_type;
     $uzman_id = $company->uzman_id;
     $hekim_id = $company->hekim_id;
+    $is_veren = $company->is_veren;
+    $sgk_sicil = $company->sgk_sicil;
+    $address = $company->address;
   }
   $sorgu2 = $pdo->prepare("SELECT * FROM `users` WHERE `id` = '$uzman_id'");
   $sorgu2->execute();
@@ -96,13 +101,63 @@ if (isset($_POST['addReport_sub'])) {
     header("Location: ../$company_name/index.php?tab=isletme_rapor");
 
   }
+
   elseif ($report_name == 'takip_liste') {
     $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load('../custom_reports/30-KLASÖR TAKİP LİSTESİ/İSG KLASÖRÜ TAKİP LİSTESİ.xlsx');
+    $worksheet = $spreadsheet->getActiveSheet();
+    $worksheet->getCell('B2')->setValue($company_name);
+
     $file_name = 'İSG Klasörü Takip Listesi_'.date('d-m-Y_G:i:s').'_.xlsx';
     $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
     $writer->save("../$company_name/isletme_raporlari/$file_name");
     header("Location: ../$company_name/index.php?tab=isletme_rapor");
   }
-}
 
+  elseif ($report_name == 'İçindekiler') {
+    $phpWord = new \PhpOffice\PhpWord\PhpWord();
+    $today = date('d-m-Y');
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('../custom_reports/içindekiler/icindekiler.docx');
+    $templateProcessor->setValue(array('{{company_name}}','{{tarih}}','{{sgk_sicil}}','{{is_veren}}','{{adres}}','{{hekim}}','{{uzman}}'), array("$company_name","Tarih:\n$today","SGK Sicil No:\n$sgk_sicil","$is_veren","$address","$h_first $h_last","$u_first $u_last"));
+    $file_name = 'İçindekiler_'.date('d-m-Y_G:i:s').'_.docx';
+    $templateProcessor->saveAs("../$company_name/isletme_raporlari/$file_name");
+    header("Location: ../$company_name/index.php?tab=isletme_rapor");
+  }
+
+  elseif ($report_name == 'yangın') {
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load('../custom_reports/yangın/YANGIN TATBİKATI KATILIM FÖYÜ.xls');
+    $file_name = 'Yangın Tatbikatı Katılım Föyü_'.date('d-m-Y_G:i:s').'_.xls';
+    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xls');
+    $writer->save("../$company_name/isletme_raporlari/$file_name");
+    header("Location: ../$company_name/index.php?tab=isletme_rapor");
+  }
+
+  elseif ($report_name == 'risk_analizi_amac') {
+    $phpWord = new \PhpOffice\PhpWord\PhpWord();
+    $future = new DateTime(date('d-m-Y'));
+    if ($danger_type == 3) {
+      $future->modify('+3 year');
+      $saat = 16;
+    }
+    elseif ($danger_type == 2) {
+      $future->modify('+2 year');
+      $saat = 12;
+    }
+    elseif ($danger_type == 1) {
+      $future->modify('+1 year');
+      $saat = 8;
+    }
+    $today = date('d-m-Y');
+    $future = $future->format('d-m-Y');
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('../custom_reports/7-RİSK ANALİZİ/risk_analizi_amac.docx');
+    $templateProcessor->setValue(array('{{company_name}}','{{tarih}}','{{future}}','{{is_veren}}','{{hekim}}','{{uzman}}'), array("$company_name","$today","$future","$is_veren","$h_first $h_last","$u_first $u_last"));
+    $file_name = 'Risk Analizi Amaç_'.date('d-m-Y_G:i:s').'_.docx';
+    $templateProcessor->saveAs("../$company_name/isletme_raporlari/$file_name");
+    header("Location: ../$company_name/index.php?tab=isletme_rapor");
+
+  }
+
+
+
+
+}
 ?>

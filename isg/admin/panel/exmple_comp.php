@@ -1,5 +1,3 @@
-<?php session_start();
-$isim = 'deneme2';
 require_once('../../calendar/utils/auth.php');
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
@@ -1559,13 +1557,20 @@ require '../core/scripts.html';
                       <option value="risk_basla">Risk Değerlendirme Başlanması</option>
                       <option value="ust_yonetim">Üst Yönetime Sunum</option>
                       <option value="risk_tablo">Risk Analiz Tablosu</option>
-                      <option value="covid19">Covid 19 Risk Değerlendirme Raporu</option>
                       <option value="sonuc">Sonuç Raporu</option>
+                    </optgroup>
+                    <optgroup label="Covid 19">
+                      <option value="adep_kapak">Covid 19 ADEP Kapak</option>
+                      <option value="adep_tablo">Covid 19 ADEP Tablo</option>
+                      <option value="vaka_sema">Vakaya Müdahale Şeması</option>
+                      <option value="c19_risk">Covid 19 Risk Değerlendirme</option>
+                      <option value="tedbir_kapak">Tedbirler Kapak</option>
+                      <option value="isyeri_tedbir">İşyerlerinde Alınacak Tedbirler</option>
                     </optgroup>
                     <optgroup label="Acil Durum Planı">
                       <option value="acil_plan_kapak">Acil Durum Eylem Planı Kapak</option>
                       <option value="acil_plan">Acil Durum Eylem Planı</option>
-                      <option value="acil_plan_sema">Acil Durum Şemları</option>
+                      <option value="acil_plan_sema">Acil Durum Şemaları</option>
                     </optgroup>
                     <optgroup label="Sağlık Güvenlik Planı">
                       <option value="sgp_kapak">SGP Kapak</option>
@@ -1573,7 +1578,14 @@ require '../core/scripts.html';
                       <option value="hazırlık">Hazırlık Koordinatörü</option>
                       <option value="uygulama">Uygulama Koordinatörü</option>
                     </optgroup>
-                    <option value="acil_ekip">Acil Durum Müdahale Ekipleri</option>
+                    <optgroup label="Acil Durum Müdahale Ekipleri">
+                      <option value="ekip_list">Ekip Listeleri</option>
+                      <option value="akvt_egitim">Arama Kurtarma ve Tahliye Eğitimi</option>
+                      <option value="akvt_atama">Arama Kurtarma ve Tahliye Ataması</option>
+                      <option value="iy_ekip">İlk Yardım Ekibi Ataması</option>
+                      <option value="ym_ekip">Yangınla Mücadele Ekibinin Ataması</option>
+                      <option value="dk_ekip">Denetim Kontrol Ekibi Covid 19</option>
+                    </optgroup>
                   </select>
                 </div>
                 <br>
